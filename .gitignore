@@ -1,0 +1,11 @@
+build/
+.gradle/
+gradle/dependencies.conf
+*.iml
+*.ipr
+*.iws
+META-INF/
+deployit-manifest.xml
+out/
+log/
+

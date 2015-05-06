@@ -1,0 +1,44 @@
+buildscript {
+  repositories {
+    jcenter()
+  }
+  dependencies {
+    classpath "nl.javadude.gradle.plugins:license-gradle-plugin:0.11.0"
+  }
+}
+
+version = '1.0.0'
+
+apply plugin: "com.github.hierynomus.license"
+apply plugin: 'java'
+apply plugin: 'idea'
+
+repositories {
+  mavenLocal()
+  mavenCentral()
+  maven {
+    credentials {
+      username 'community-plugins'
+      password 'community'
+    }
+    url 'http://nexus.xebialabs.com/nexus/content/repositories/releases'
+  }
+}
+
+dependencies {
+  compile "com.xebialabs.deployit:udm-plugin-api:2014.7"
+  compile "com.xebialabs.deployit:engine-spi:2014.7"
+  compile "com.xebialabs.deployit:engine-api:2014.7"
+  compile 'com.google.guava:guava:16.0'
+  compile 'com.google.code.findbugs:findbugs:3.0.0'
+  compile 'commons-io:commons-io:1.4'
+  compile 'org.jdom:jdom:2.0.2'
+  testCompile 'junit:junit:4.12'
+
+}
+
+license {
+  header rootProject.file('src/main/license/xebialabs_community.license')
+  exclude "**/package.json"
+  strictCheck false
+}
