@@ -3,7 +3,7 @@ deploy:
   provider: releases
   api_key:
     secure: G5pjR4ZK3hjmGob0nXI0kob2nlljeVirSu31H5u505YifCybLEln34iY9JqptjE8Rl2ho861d62cBSxsPWzbuEn/bYAf8IzUoLABhRmAn4rJQPVodQM/LGwJL8o8T/oJGdth3zF/Pi0NHspkOfINysUS2R58LKDCDy/enM8wgEhplFusl7fCW31mo5Itz7SgMmDxuxyln2riKCUk48oOo6hUIvQSTQsAWVoBOjFBJd+cdyu9qoOVJofbVkS5g8JM2SQxYZN8MqkRSlkmWga60bryWMOp1gSKk5Ddv80AkB3rC/4yE5MCNWKbaWSbVMM9fL9p4p6iSa4E4n8m/etYYm0nx1q1UWAHVimPBeqXCN86kPF9VwOgx9xzzJCO1LNkkRqUsJVjhoudq21FOLbGApkKJw1UwAoOvBNSQBhr+ywCPyG2XQiU9KfU05NZFJuO0PzBz/1blMYkRq1BqWvzA+fVumOyTvQ8IfEzhWwEyN2W+9U1W9LVt6LbsBaju5aGc0nCMTnLU8szIpa5mG2lIlXW+sa0fT2FyHY/S9N+m1OM6Op5lg883NIFkFTkpOpMX9YEDVtirxOAS1lpA5GVwQGzjxdpUFLwRpLL+oaM28CuL8v1EeDFEGU1P9Ufz+2aGRhg2+aQiBLEQUL2TDMDG9MZd0vxUtEbvDLL3CFflto=
-  file: build//libs/xld-deployed-artifact-steps-plugin-1.0.0.jar
+  file: build//libs/xld-deployed-artifact-steps-plugin-1.0.1.jar
   on:
     all_branches: true
     tags: true
