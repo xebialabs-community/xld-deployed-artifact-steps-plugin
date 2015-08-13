@@ -1,0 +1,13 @@
+language: java
+deploy:
+  provider: releases
+  api_key:
+    secure: XEbEI9IF1YjhRL4bPZ0GwweLX5+9O7oRik1to1fuuEuZo/asNEXj2Wjis54H7MkgV8oYxgtzPKcWU8QqElyq+QsaCUcrCMOZ3MLCURE4k30pNLxxFLA3R9Pt1z1YLzA2q9lL5ccAcYbuBskRMLD8CJD7jLa4f7AS9hQFWgLKG1w=
+  file: build//libs/xld-deployed-artifact-steps-plugin-1.0.0-SNAPSHOT.jar
+  on:
+    all_branches: true
+    tags: true
+notifications:
+  hipchat:
+    rooms:
+      secure: pWD0N51IyMu90OXsw/K7f+CLudJ1BMZYD1iFjQatFIjHR5tecdx3q7B+Xiq8iPV39ekS1johw580elI3ylvx0aES/ZAzTxZ9Y0nSOhjdTkqugTAnmp8GKhP2fOsvNDPQ8j42BlraetrL5yjjv24OXgXVkg/Lo46e0o2juxiBEDjJBavYv1NUmzSE2raEjMJZA2yni2HeIvUU1hB5KP4oy8riSKsKvbbCN8xXQ6yI6Gr1G9VoEknEJRIjy4ye+O//NPhHsxjCC3CLwLghJZSVI7wCVoWQovpyQuLIVU3oADait/NZOTTJJDzb3FbRWk02p0ePpBYVwNNjhsAss37S8UGAuLSr5qU6ZjbCXNxdWlZKpEmfXly/eYe1Hpuvw9j3V3+SNZprpWpmFCcUCojqaKlcvwV8GfMT0owkfP0OkPuqYjQkaZiiRGMpg4EY34GiveFf49bivEBkdwpHMzLmlheFmcWbxLtsck/BfODG9Zuyua2ypfl8uw2FoTkGRJEx7TmResTj+VwBE6ocn2TPK4v0fa8o9IxlLnaJPM/OtS5+sGUanwAVfwqjatRu0M//OMaYIIhudIpbYURBHZdWy9+2G9KVuJUwbLGo82yJGmd73hlzkKa3Tfk/AjsuNogNDKvv4TjA3i1ViLz5D1AeyECe5Eaj5j/0JM2knHiGKB4=
