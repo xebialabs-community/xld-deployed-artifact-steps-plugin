@@ -3,7 +3,7 @@ deploy:
   provider: releases
   api_key:
     secure: XEbEI9IF1YjhRL4bPZ0GwweLX5+9O7oRik1to1fuuEuZo/asNEXj2Wjis54H7MkgV8oYxgtzPKcWU8QqElyq+QsaCUcrCMOZ3MLCURE4k30pNLxxFLA3R9Pt1z1YLzA2q9lL5ccAcYbuBskRMLD8CJD7jLa4f7AS9hQFWgLKG1w=
-  file: build//libs/xld-deployed-artifact-steps-plugin-1.0.0-SNAPSHOT.jar
+  file: build//libs/xld-deployed-artifact-steps-plugin-1.0.0.jar
   on:
     all_branches: true
     tags: true
