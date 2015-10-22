@@ -5,6 +5,7 @@
  */
 package com.xebialabs.overtherepy;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
@@ -18,7 +19,7 @@ import com.google.common.collect.Sets;
 import com.google.common.hash.HashCode;
 import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;
-import com.google.common.io.ByteStreams;
+import com.google.common.io.ByteSource;
 import com.google.common.io.InputSupplier;
 
 import com.xebialabs.overthere.OverthereFile;
@@ -41,7 +42,7 @@ public class DirectoryDiff {
     /**
      * Constructor
      *
-     * @param leftSide directory to compare
+     * @param leftSide  directory to compare
      * @param rightSide directory to compare
      */
     public DirectoryDiff(OverthereFile leftSide, OverthereFile rightSide) {
@@ -71,12 +72,38 @@ public class DirectoryDiff {
      * @throws IOException
      */
     public static String md5(final OverthereFile file) throws IOException {
-        return ByteStreams.hash(new InputSupplier<InputStream>() {
-            @Override
-            public InputStream getInput() throws IOException {
-                return file.getInputStream();
+        return asByteSource(file).hash(Hashing.md5()).toString();
+    }
+
+    private static ByteSource asByteSource(final OverthereFile file) {
+        return new OverthereFileByteSource(file);
+    }
+
+    private static final class OverthereFileByteSource extends ByteSource {
+
+        final OverthereFile file;
+
+        private OverthereFileByteSource(final OverthereFile file) {
+            this.file = file;
+        }
+
+        @Override
+        public InputStream openStream() throws IOException {
+            return file.getInputStream();
+        }
+
+        @Override
+        public long size() throws IOException {
+            if (!file.isFile()) {
+                throw new FileNotFoundException(file.toString());
             }
-        }, Hashing.md5()).toString();
+            return file.length();
+        }
+
+        @Override
+        public String toString() {
+            return "OverthereFileByteSource.asByteSource(" + file + ")";
+        }
     }
 
     /*
@@ -85,7 +112,7 @@ public class DirectoryDiff {
      */
     private void compareDirectoryRecursive(OverthereFile left, OverthereFile right, DirectoryChangeSet changeSet) throws IOException {
         List<OverthereFile[]> dirsToRecurse = compareDirectory(left, right, changeSet);
-        for(OverthereFile[] leftAndRightDir : dirsToRecurse) {
+        for (OverthereFile[] leftAndRightDir : dirsToRecurse) {
             compareDirectoryRecursive(leftAndRightDir[0], leftAndRightDir[1], changeSet);
         }
     }
@@ -106,7 +133,7 @@ public class DirectoryDiff {
         //filter out directories
         Map<FileWrapper, FileWrapper> rightFilesIndex = newHashMap();
         for (FileWrapper file : rightFiles) {
-            rightFilesIndex.put(file,file);
+            rightFilesIndex.put(file, file);
         }
 
         Set<FileWrapper> filesChanged = newHashSet();
@@ -119,7 +146,7 @@ public class DirectoryDiff {
             }
         }
 
-        Function<FileWrapper,OverthereFile> unwrapFunction = new Function<FileWrapper, OverthereFile>() {
+        Function<FileWrapper, OverthereFile> unwrapFunction = new Function<FileWrapper, OverthereFile>() {
             @Override
             public OverthereFile apply(final FileWrapper input) {
                 return input.getFile();
@@ -139,19 +166,12 @@ public class DirectoryDiff {
     }
 
 
-
     private Set<FileWrapper> listFiles(OverthereFile dir) {
         return newHashSet(Lists.transform(newArrayList(dir.listFiles()), new WrapFile()));
     }
 
-    private HashCode hash(final OverthereFile file, HashFunction hashFunction)
-            throws IOException {
-        return ByteStreams.hash(new InputSupplier<InputStream>() {
-            @Override
-            public InputStream getInput() throws IOException {
-                return file.getInputStream();
-            }
-        }, hashFunction);
+    private HashCode hash(final OverthereFile file, HashFunction hashFunction) throws IOException {
+        return asByteSource(file).hash(hashFunction);
     }
 
     public static class DirectoryChangeSet {
@@ -173,7 +193,7 @@ public class DirectoryDiff {
 
     }
 
-    static class WrapFile implements Function<OverthereFile,FileWrapper> {
+    static class WrapFile implements Function<OverthereFile, FileWrapper> {
 
         @Override
         public FileWrapper apply(final OverthereFile input) {
@@ -184,7 +204,7 @@ public class DirectoryDiff {
     static class FileWrapper {
         private OverthereFile file;
 
-        FileWrapper(OverthereFile file ) {
+        FileWrapper(OverthereFile file) {
             this.file = file;
         }
 
@@ -200,7 +220,7 @@ public class DirectoryDiff {
         @Override
         public boolean equals(final Object obj) {
             if (obj instanceof FileWrapper) {
-                return file.getName().equals(((FileWrapper)obj).file.getName());
+                return file.getName().equals(((FileWrapper) obj).file.getName());
             }
             return false;
         }
@@ -212,17 +232,15 @@ public class DirectoryDiff {
     }
 
     enum FileWrapperPredicates implements Predicate<FileWrapper> {
-        FILE{
-
+        FILE {
             @Override
-            public boolean apply(final FileWrapper input){
+            public boolean apply(final FileWrapper input) {
                 return input.getFile().isFile();
             }
         },
-        DIRECTORY{
-
+        DIRECTORY {
             @Override
-            public boolean apply(final FileWrapper input){
+            public boolean apply(final FileWrapper input) {
                 return input.getFile().isDirectory();
             }
         }
