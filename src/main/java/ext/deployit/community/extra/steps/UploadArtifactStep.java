@@ -27,18 +27,11 @@ public class UploadArtifactStep extends BaseArtifactStep {
     public void postContruct(StepPostConstructContext ctx) {
         doConfigure(ctx);
         if (description.isEmpty()) {
-            description = format("Upload '%s' to '%s'", defaultArtifact(ctx).getName(), defaultTargetContainer(ctx).getName());
+            description = format("Upload '%s' to '%s'", getArtifact().getName(), getTargetHost().getName());
         }
         if (order == 0) {
             order = 60;
         }
-    }
-
-    protected Deployed<? extends Deployable, ? extends Container> defaultDeployed(final StepPostConstructContext ctx) {
-        if (ctx.getScope() == Scope.DEPLOYED) {
-            return ctx.getDelta().getDeployed();
-        }
-        throw new RuntimeException("delete-artifact step can be used only using the 'deployed' scope");
     }
 
     public StepExitCode execute(ExecutionContext ctx) throws Exception {

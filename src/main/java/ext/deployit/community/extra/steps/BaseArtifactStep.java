@@ -7,6 +7,7 @@ package ext.deployit.community.extra.steps;
 
 import com.xebialabs.deployit.plugin.api.flow.Step;
 import com.xebialabs.deployit.plugin.api.rules.Scope;
+import com.xebialabs.deployit.plugin.api.rules.StepMetadata;
 import com.xebialabs.deployit.plugin.api.rules.StepParameter;
 import com.xebialabs.deployit.plugin.api.rules.StepPostConstructContext;
 import com.xebialabs.deployit.plugin.api.udm.Container;
@@ -35,8 +36,8 @@ public abstract class BaseArtifactStep implements Step {
     @StepParameter(name = "description", description = "The description of this step", calculated = true)
     String description = "";
 
-    @StepParameter(name = "deployed", description = "Deployed on which the step will be applied on.", calculated = true)
-    private Deployed deployed;
+    @StepParameter(name = "previous-artifact", description = "Previous deployed artifact.", calculated = true, required = false)
+    private Artifact previousArtifact;
 
 
     public int getOrder() {
@@ -47,13 +48,10 @@ public abstract class BaseArtifactStep implements Step {
         return description;
     }
 
-
     protected void doConfigure(final StepPostConstructContext ctx) {
-        if (ctx.getScope() != Scope.DEPLOYED)
-            throw new RuntimeException("upload-artifact and delete-artifact step can be used only using the 'deployed' scope");
-
-        if (deployed == null) {
-            deployed = defaultDeployed(ctx);
+        if (ctx.getScope() != Scope.DEPLOYED) {
+            final StepMetadata annotation = this.getClass().getAnnotation(StepMetadata.class);
+            throw new RuntimeException("<" + annotation.name() + ">step can be used only using the 'deployed' scope");
         }
 
         if (targetHost == null) {
@@ -62,6 +60,10 @@ public abstract class BaseArtifactStep implements Step {
 
         if (artifact == null) {
             artifact = defaultArtifact(ctx);
+        }
+
+        if (previousArtifact == null) {
+            previousArtifact = defaultPreviousArtifact(ctx);
         }
     }
 
@@ -73,16 +75,12 @@ public abstract class BaseArtifactStep implements Step {
         return targetPath;
     }
 
-    public Deployed getDeployed() {
-        return deployed;
-    }
-
     public Artifact getArtifact() {
         return artifact;
     }
 
-    Host defaultHost(final StepPostConstructContext context) {
-        final Container container = defaultTargetContainer(context);
+    private Host defaultHost(final StepPostConstructContext context) {
+        final Container container = context.getDelta().getDeployed().getContainer();
         if (container instanceof HostContainer) {
             HostContainer hostContainer = (HostContainer) container;
             return hostContainer.getHost();
@@ -92,32 +90,21 @@ public abstract class BaseArtifactStep implements Step {
         return null;
     }
 
-    Container defaultTargetContainer(StepPostConstructContext ctx) {
-        if (ctx.getScope() == Scope.DEPLOYED) {
-            return getDeployed().getContainer();
-        }
-        throw new RuntimeException("Cannot find defaultTargetContainer ");
+    private Artifact defaultArtifact(StepPostConstructContext ctx) {
+        final Deployed<? extends Deployable, ? extends Container> deployed = ctx.getDelta().getDeployed();
+        return deployed instanceof Artifact ? (Artifact) deployed : null;
     }
 
-    Artifact defaultArtifact(StepPostConstructContext ctx) {
-        if (ctx.getScope() == Scope.DEPLOYED) {
-            final Deployed<? extends Deployable, ? extends Container> deployed = getDeployed();
-            if (deployed instanceof Artifact) {
-                Artifact artifact = (Artifact) deployed;
-                return artifact;
-            }
-        }
-        return null;
+    private Artifact defaultPreviousArtifact(StepPostConstructContext ctx) {
+        final Deployed<? extends Deployable, ? extends Container> deployed = ctx.getDelta().getPrevious();
+        return deployed instanceof Artifact ? (Artifact) deployed : null;
     }
-
-    abstract protected Deployed<? extends Deployable, ? extends Container> defaultDeployed(final StepPostConstructContext ctx);
 
     protected String stringPathPrefix(final OverthereFile file, final String prefix) {
-
         final String path = file.getPath();
         final int path_length = path.length();
         final int prefix_length = prefix.length();
-        String relativePath = path.substring(prefix_length + 1, path_length);
+        final String relativePath = path.substring(prefix_length + 1, path_length);
         return relativePath.replace('\\', '/');
     }
 

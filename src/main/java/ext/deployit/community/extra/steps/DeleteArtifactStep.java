@@ -24,19 +24,14 @@ public class DeleteArtifactStep extends BaseArtifactStep {
     public void postContruct(StepPostConstructContext ctx) {
         doConfigure(ctx);
         if (description.isEmpty()) {
-            description = String.format("Delete '%s' from '%s'", defaultArtifact(ctx).getName(), defaultTargetContainer(ctx).getName());
+            description = String.format("Delete '%s' from '%s'", getArtifact().getName(), getTargetHost().getName());
         }
         if (order == 0) {
             order = 30;
         }
     }
 
-    protected Deployed<? extends Deployable, ? extends Container> defaultDeployed(final StepPostConstructContext ctx) {
-        if (ctx.getScope() == Scope.DEPLOYED) {
-            return ctx.getDelta().getPrevious();
-        }
-        throw new RuntimeException("delete-artifact step can be used only using the 'deployed' scope");
-    }
+
 
     public StepExitCode execute(ExecutionContext ctx) throws Exception {
         try (OverthereConnection connection = getTargetHost().getConnection()) {
@@ -57,7 +52,7 @@ public class DeleteArtifactStep extends BaseArtifactStep {
                 }
             }
             if (artifactFile.isDirectory()) {
-                deleteRemoteDirectory(artifactFile, remoteTargetPath,ctx);
+                deleteRemoteDirectory(artifactFile, remoteTargetPath, ctx);
             }
             return StepExitCode.SUCCESS;
         }
