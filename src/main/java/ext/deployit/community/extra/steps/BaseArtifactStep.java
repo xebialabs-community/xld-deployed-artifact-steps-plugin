@@ -79,6 +79,10 @@ public abstract class BaseArtifactStep implements Step {
         return artifact;
     }
 
+    public Artifact getPreviousArtifact() {
+        return previousArtifact;
+    }
+
     private Host defaultHost(final StepPostConstructContext context) {
         final Container container = context.getDelta().getDeployed().getContainer();
         if (container instanceof HostContainer) {

@@ -8,12 +8,8 @@ package ext.deployit.community.extra.steps;
 import com.xebialabs.deployit.plugin.api.flow.ExecutionContext;
 import com.xebialabs.deployit.plugin.api.flow.StepExitCode;
 import com.xebialabs.deployit.plugin.api.rules.RulePostConstruct;
-import com.xebialabs.deployit.plugin.api.rules.Scope;
 import com.xebialabs.deployit.plugin.api.rules.StepMetadata;
 import com.xebialabs.deployit.plugin.api.rules.StepPostConstructContext;
-import com.xebialabs.deployit.plugin.api.udm.Container;
-import com.xebialabs.deployit.plugin.api.udm.Deployable;
-import com.xebialabs.deployit.plugin.api.udm.Deployed;
 import com.xebialabs.overthere.OverthereConnection;
 import com.xebialabs.overthere.OverthereFile;
 import com.xebialabs.overtherepy.DirectoryDiff;
@@ -58,7 +54,7 @@ public class UploadArtifactStep extends BaseArtifactStep {
 
             if (artifactFile.isDirectory()) {
                 ctx.logOutput("Artifact: Folder");
-                com.xebialabs.overtherepy.DirectoryDiff diff = new DirectoryDiff(remoteTargetPath, artifactFile);
+                DirectoryDiff diff = new DirectoryDiff(remoteTargetPath, artifactFile);
                 final DirectoryDiff.DirectoryChangeSet changeSet = diff.diff();
                 ctx.logOutput(format("%d files to be removed.", changeSet.getRemoved().size()));
                 ctx.logOutput(format("%d new files to be copied.", changeSet.getAdded().size()));
@@ -66,6 +62,15 @@ public class UploadArtifactStep extends BaseArtifactStep {
 
                 if (changeSet.getRemoved().size() > 0) {
                     ctx.logOutput("Start removal of files...");
+                    if (getPreviousArtifact() != null) {
+                        DirectoryDiff diffPrevious = new DirectoryDiff(getPreviousArtifact().getFile(), artifactFile);
+                        final DirectoryDiff.DirectoryChangeSet previousChangeSet = diffPrevious.diff();
+                        ctx.logOutput(format("Previous Change Set.....");
+                        ctx.logOutput(format("%d files to be removed.", previousChangeSet.getRemoved().size()));
+                        ctx.logOutput(format("%d new files to be copied.", previousChangeSet.getAdded().size()));
+                        ctx.logOutput(format("%d modified files to be copied.", previousChangeSet.getChanged().size()));
+                        ctx.logOutput(format("/Previous Change Set.....");
+                    }
                     for (OverthereFile f : changeSet.getRemoved()) {
                         OverthereFile removedFile = remoteTargetPath.getFile(stringPathPrefix(f, getTargetPath()));
                         String fileType = (f.isDirectory() ? "directory" : "file");
