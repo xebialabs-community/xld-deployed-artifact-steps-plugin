@@ -31,8 +31,6 @@ public class DeleteArtifactStep extends BaseArtifactStep {
         }
     }
 
-
-
     public StepExitCode execute(ExecutionContext ctx) throws Exception {
         try (OverthereConnection connection = getTargetHost().getConnection()) {
             final OverthereFile remoteTargetPath = connection.getFile(getTargetPath());

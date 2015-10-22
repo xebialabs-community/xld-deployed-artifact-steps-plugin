@@ -36,9 +36,11 @@ public abstract class BaseArtifactStep implements Step {
     @StepParameter(name = "description", description = "The description of this step", calculated = true)
     String description = "";
 
-    @StepParameter(name = "previous-artifact", description = "Previous deployed artifact.", calculated = true, required = false)
+    @StepParameter(name = "previousArtifact", description = "Previous deployed artifact.", calculated = true, required = false)
     private Artifact previousArtifact;
 
+    @StepParameter(name = "sharedTarget", description = "Tell the target directory is shared", calculated = true)
+    private boolean sharedTarget = true;
 
     public int getOrder() {
         return order;
@@ -65,6 +67,7 @@ public abstract class BaseArtifactStep implements Step {
         if (previousArtifact == null) {
             previousArtifact = defaultPreviousArtifact(ctx);
         }
+
     }
 
     public Host getTargetHost() {
@@ -81,6 +84,10 @@ public abstract class BaseArtifactStep implements Step {
 
     public Artifact getPreviousArtifact() {
         return previousArtifact;
+    }
+
+    public boolean isSharedTarget() {
+        return sharedTarget;
     }
 
     private Host defaultHost(final StepPostConstructContext context) {

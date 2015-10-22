@@ -60,23 +60,29 @@ public class UploadArtifactStep extends BaseArtifactStep {
                 ctx.logOutput(format("%d new files to be copied.", changeSet.getAdded().size()));
                 ctx.logOutput(format("%d modified files to be copied.", changeSet.getChanged().size()));
 
+
                 if (changeSet.getRemoved().size() > 0) {
                     ctx.logOutput("Start removal of files...");
-                    if (getPreviousArtifact() != null) {
-                        DirectoryDiff diffPrevious = new DirectoryDiff(getPreviousArtifact().getFile(), artifactFile);
-                        final DirectoryDiff.DirectoryChangeSet previousChangeSet = diffPrevious.diff();
-                        ctx.logOutput(format("Previous Change Set.....");
-                        ctx.logOutput(format("%d files to be removed.", previousChangeSet.getRemoved().size()));
-                        ctx.logOutput(format("%d new files to be copied.", previousChangeSet.getAdded().size()));
-                        ctx.logOutput(format("%d modified files to be copied.", previousChangeSet.getChanged().size()));
-                        ctx.logOutput(format("/Previous Change Set.....");
+                    DirectoryDiff.DirectoryChangeSet previousChangeSet = null;
+                    if (isSharedTarget() && getPreviousArtifact() != null) {
+                        previousChangeSet = new DirectoryDiff(remoteTargetPath, getPreviousArtifact().getFile()).diff();
+                        ctx.logOutput(format("Shared options is on and we have a previous artifact"));
+                        ctx.logOutput(format("previous %d files to be removed:    %s", previousChangeSet.getRemoved().size(), previousChangeSet.getRemoved()));
+                        ctx.logOutput(format("previous %d new files to be copied: %s", previousChangeSet.getAdded().size(), previousChangeSet.getAdded()));
+                        ctx.logOutput(format("previous %d modified files to be copied.", previousChangeSet.getChanged().size()));
+                        ctx.logOutput(format("/Previous Change Set....."));
                     }
+
                     for (OverthereFile f : changeSet.getRemoved()) {
                         OverthereFile removedFile = remoteTargetPath.getFile(stringPathPrefix(f, getTargetPath()));
                         String fileType = (f.isDirectory() ? "directory" : "file");
                         if (removedFile.exists()) {
-                            ctx.logOutput(format("Removing %s %s", fileType, removedFile.getPath()));
-                            removedFile.deleteRecursively();
+                            if (isSharedTarget() && previousChangeSet.getRemoved().contains(f)) {
+                                ctx.logOutput(format("Skipping %s %s", fileType, removedFile.getPath()));
+                            } else {
+                                ctx.logOutput(format("Removing %s %s", fileType, removedFile.getPath()));
+                                removedFile.deleteRecursively();
+                            }
                         } else {
                             ctx.logOutput(format("File %s does not exist. Ignoring.", removedFile.getPath()));
                         }
@@ -88,7 +94,6 @@ public class UploadArtifactStep extends BaseArtifactStep {
                 if (changeSet.getAdded().size() > 0) {
                     ctx.logOutput("Start copying of new files...");
                     for (OverthereFile f : changeSet.getAdded()) {
-
                         OverthereFile addFile = remoteTargetPath.getFile(stringPathPrefix(f, artifactFilePath));
                         String fileType = "file";
                         if (f.isDirectory()) {
@@ -102,7 +107,6 @@ public class UploadArtifactStep extends BaseArtifactStep {
                         }
                         ctx.logOutput(format("Copying %s %s", fileType, addFile.getPath()));
                         f.copyTo(addFile);
-
                     }
                     ctx.logOutput("Copying of new files done.");
                 }
