@@ -113,7 +113,11 @@ public abstract class BaseArtifactStep implements Step {
     abstract protected Deployed<? extends Deployable, ? extends Container> defaultDeployed(final StepPostConstructContext ctx);
 
     protected String stringPathPrefix(final OverthereFile file, final String prefix) {
-        String relativePath = file.getPath().substring(prefix.length() + 1, file.getPath().length());
+
+        final String path = file.getPath();
+        final int path_length = path.length();
+        final int prefix_length = prefix.length();
+        String relativePath = path.substring(prefix_length + 1, path_length);
         return relativePath.replace('\\', '/');
     }
 

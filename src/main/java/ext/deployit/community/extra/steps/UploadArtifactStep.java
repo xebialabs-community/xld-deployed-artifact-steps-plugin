@@ -50,6 +50,7 @@ public class UploadArtifactStep extends BaseArtifactStep {
             }
 
             final OverthereFile artifactFile = getArtifact().getFile();
+            final String artifactFilePath = artifactFile.getPath();
             if (artifactFile.isFile()) {
                 ctx.logOutput("Artifact: file");
                 final OverthereFile remoteFile = connection.getFile(remoteTargetPath, artifactFile.getName());
@@ -57,7 +58,7 @@ public class UploadArtifactStep extends BaseArtifactStep {
                     ctx.logError(format("Remote file '%s' exists, it will be removed", remoteFile.getPath()));
                     remoteFile.delete();
                 }
-                ctx.logOutput(format("Copy %s -> %s", artifactFile.getPath(), remoteFile.getPath()));
+                ctx.logOutput(format("Copy %s -> %s", artifactFilePath, remoteFile.getPath()));
                 artifactFile.copyTo(remoteFile);
             }
 
@@ -89,7 +90,8 @@ public class UploadArtifactStep extends BaseArtifactStep {
                 if (changeSet.getAdded().size() > 0) {
                     ctx.logOutput("Start copying of new files...");
                     for (OverthereFile f : changeSet.getAdded()) {
-                        OverthereFile addFile = remoteTargetPath.getFile(stringPathPrefix(f, artifactFile.getPath()));
+
+                        OverthereFile addFile = remoteTargetPath.getFile(stringPathPrefix(f, artifactFilePath));
                         String fileType = "file";
                         if (f.isDirectory()) {
                             fileType = "directory";
@@ -110,7 +112,7 @@ public class UploadArtifactStep extends BaseArtifactStep {
                 if (changeSet.getChanged().size() > 0) {
                     ctx.logOutput("Start copying of modified files...");
                     for (OverthereFile f : changeSet.getChanged()) {
-                        OverthereFile changedFile = remoteTargetPath.getFile(stringPathPrefix(f, artifactFile.getPath()));
+                        OverthereFile changedFile = remoteTargetPath.getFile(stringPathPrefix(f, artifactFilePath));
                         ctx.logOutput(format("Updating file %s", changedFile.getPath()));
                         f.copyTo(changedFile);
                     }
