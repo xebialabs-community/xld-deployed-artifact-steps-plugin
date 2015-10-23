@@ -5,24 +5,20 @@
  */
 package ext.deployit.community.extra.steps;
 
+import com.xebialabs.deployit.plugin.api.deployment.specification.Delta;
 import com.xebialabs.deployit.plugin.api.flow.Step;
 import com.xebialabs.deployit.plugin.api.rules.Scope;
 import com.xebialabs.deployit.plugin.api.rules.StepMetadata;
 import com.xebialabs.deployit.plugin.api.rules.StepParameter;
 import com.xebialabs.deployit.plugin.api.rules.StepPostConstructContext;
 import com.xebialabs.deployit.plugin.api.udm.Container;
-import com.xebialabs.deployit.plugin.api.udm.Deployable;
 import com.xebialabs.deployit.plugin.api.udm.Deployed;
-import com.xebialabs.deployit.plugin.api.udm.artifact.Artifact;
 import com.xebialabs.deployit.plugin.overthere.Host;
 import com.xebialabs.deployit.plugin.overthere.HostContainer;
 import com.xebialabs.overthere.OverthereFile;
 
 
 public abstract class BaseArtifactStep implements Step {
-
-    @StepParameter(name = "artifact", description = "Artifact that has been uploaded to the target host.")
-    private Artifact artifact;
 
     @StepParameter(name = "target-host", description = "A target host where the step is applied.", calculated = true)
     private Host targetHost;
@@ -35,9 +31,6 @@ public abstract class BaseArtifactStep implements Step {
 
     @StepParameter(name = "description", description = "The description of this step", calculated = true)
     String description = "";
-
-    @StepParameter(name = "previousArtifact", description = "Previous deployed artifact.", calculated = true, required = false)
-    private Artifact previousArtifact;
 
     @StepParameter(name = "sharedTarget", description = "Tell the target directory is shared", calculated = true)
     private boolean sharedTarget = true;
@@ -59,15 +52,6 @@ public abstract class BaseArtifactStep implements Step {
         if (targetHost == null) {
             targetHost = defaultHost(ctx);
         }
-
-        if (artifact == null) {
-            artifact = defaultArtifact(ctx);
-        }
-
-        if (previousArtifact == null) {
-            previousArtifact = defaultPreviousArtifact(ctx);
-        }
-
     }
 
     public Host getTargetHost() {
@@ -78,20 +62,12 @@ public abstract class BaseArtifactStep implements Step {
         return targetPath;
     }
 
-    public Artifact getArtifact() {
-        return artifact;
-    }
-
-    public Artifact getPreviousArtifact() {
-        return previousArtifact;
-    }
-
     public boolean isSharedTarget() {
         return sharedTarget;
     }
 
     private Host defaultHost(final StepPostConstructContext context) {
-        final Container container = context.getDelta().getDeployed().getContainer();
+        final Container container = getDeployedOrPrevious(context.getDelta()).getContainer();
         if (container instanceof HostContainer) {
             HostContainer hostContainer = (HostContainer) container;
             return hostContainer.getHost();
@@ -101,15 +77,18 @@ public abstract class BaseArtifactStep implements Step {
         return null;
     }
 
-    private Artifact defaultArtifact(StepPostConstructContext ctx) {
-        final Deployed<? extends Deployable, ? extends Container> deployed = ctx.getDelta().getDeployed();
-        return deployed instanceof Artifact ? (Artifact) deployed : null;
+    protected Deployed<?, ?> getDeployedOrPrevious(final Delta delta) {
+        switch (delta.getOperation()) {
+            case CREATE:
+            case MODIFY:
+            case NOOP:
+                return delta.getDeployed();
+            case DESTROY:
+                return delta.getPrevious();
+        }
+        throw new RuntimeException("Should not be here !" + delta);
     }
 
-    private Artifact defaultPreviousArtifact(StepPostConstructContext ctx) {
-        final Deployed<? extends Deployable, ? extends Container> deployed = ctx.getDelta().getPrevious();
-        return deployed instanceof Artifact ? (Artifact) deployed : null;
-    }
 
     protected String stringPathPrefix(final OverthereFile file, final String prefix) {
         final String path = file.getPath();

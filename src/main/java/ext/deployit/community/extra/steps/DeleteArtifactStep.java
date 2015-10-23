@@ -8,26 +8,37 @@ package ext.deployit.community.extra.steps;
 import com.xebialabs.deployit.plugin.api.flow.ExecutionContext;
 import com.xebialabs.deployit.plugin.api.flow.StepExitCode;
 import com.xebialabs.deployit.plugin.api.rules.RulePostConstruct;
-import com.xebialabs.deployit.plugin.api.rules.Scope;
 import com.xebialabs.deployit.plugin.api.rules.StepMetadata;
+import com.xebialabs.deployit.plugin.api.rules.StepParameter;
 import com.xebialabs.deployit.plugin.api.rules.StepPostConstructContext;
 import com.xebialabs.deployit.plugin.api.udm.Container;
 import com.xebialabs.deployit.plugin.api.udm.Deployable;
 import com.xebialabs.deployit.plugin.api.udm.Deployed;
+import com.xebialabs.deployit.plugin.api.udm.artifact.Artifact;
 import com.xebialabs.overthere.OverthereConnection;
 import com.xebialabs.overthere.OverthereFile;
 
 @StepMetadata(name = "delete-artifact")
 public class DeleteArtifactStep extends BaseArtifactStep {
 
+    @StepParameter(name = "previousArtifact", description = "Previous deployed artifact.", calculated = true)
+    private Artifact previousArtifact;
+
     @RulePostConstruct
     public void postContruct(StepPostConstructContext ctx) {
         doConfigure(ctx);
-        if (description.isEmpty()) {
-            description = String.format("Delete '%s' from '%s'", getArtifact().getName(), getTargetHost().getName());
+
+        if (previousArtifact == null) {
+            previousArtifact = defaultPreviousArtifact(ctx);
         }
+
         if (order == 0) {
             order = 30;
+        }
+
+        if (description.isEmpty()) {
+            final Deployed<?, ?> deployedOrPrevious = getDeployedOrPrevious(ctx.getDelta());
+            description = String.format("Delete '%s' from '%s'", deployedOrPrevious.getName(), deployedOrPrevious.getContainer().getName());
         }
     }
 
@@ -39,7 +50,7 @@ public class DeleteArtifactStep extends BaseArtifactStep {
                 return StepExitCode.SUCCESS;
             }
 
-            final OverthereFile artifactFile = getArtifact().getFile();
+            final OverthereFile artifactFile = previousArtifact.getFile();
             if (artifactFile.isFile()) {
                 final OverthereFile remoteFile = connection.getFile(remoteTargetPath, artifactFile.getName());
                 if (remoteFile.exists()) {
@@ -84,5 +95,9 @@ public class DeleteArtifactStep extends BaseArtifactStep {
         }
     }
 
+    private Artifact defaultPreviousArtifact(StepPostConstructContext ctx) {
+        final Deployed<? extends Deployable, ? extends Container> deployed = ctx.getDelta().getPrevious();
+        return deployed instanceof Artifact ? (Artifact) deployed : null;
+    }
 
 }

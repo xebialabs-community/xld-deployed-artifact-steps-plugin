@@ -9,7 +9,12 @@ import com.xebialabs.deployit.plugin.api.flow.ExecutionContext;
 import com.xebialabs.deployit.plugin.api.flow.StepExitCode;
 import com.xebialabs.deployit.plugin.api.rules.RulePostConstruct;
 import com.xebialabs.deployit.plugin.api.rules.StepMetadata;
+import com.xebialabs.deployit.plugin.api.rules.StepParameter;
 import com.xebialabs.deployit.plugin.api.rules.StepPostConstructContext;
+import com.xebialabs.deployit.plugin.api.udm.Container;
+import com.xebialabs.deployit.plugin.api.udm.Deployable;
+import com.xebialabs.deployit.plugin.api.udm.Deployed;
+import com.xebialabs.deployit.plugin.api.udm.artifact.Artifact;
 import com.xebialabs.overthere.OverthereConnection;
 import com.xebialabs.overthere.OverthereFile;
 import com.xebialabs.overtherepy.DirectoryDiff;
@@ -19,14 +24,30 @@ import static java.lang.String.format;
 @StepMetadata(name = "upload-artifact")
 public class UploadArtifactStep extends BaseArtifactStep {
 
+    @StepParameter(name = "artifact", description = "Artifact that has been uploaded to the target host.")
+    private Artifact artifact;
+
+    @StepParameter(name = "previousArtifact", description = "Previous deployed artifact.", calculated = true, required = false)
+    private Artifact previousArtifact;
+
     @RulePostConstruct
     public void postContruct(StepPostConstructContext ctx) {
         doConfigure(ctx);
-        if (description.isEmpty()) {
-            description = format("Upload '%s' to '%s'", getArtifact().getName(), getTargetHost().getName());
-        }
         if (order == 0) {
             order = 60;
+        }
+
+        if (artifact == null) {
+            artifact = defaultArtifact(ctx);
+        }
+
+        if (previousArtifact == null) {
+            previousArtifact = defaultPreviousArtifact(ctx);
+        }
+
+        if (description.isEmpty()) {
+            final Deployed<?, ?> deployedOrPrevious = getDeployedOrPrevious(ctx.getDelta());
+            description = format("Upload '%s' to '%s'", deployedOrPrevious.getName(), deployedOrPrevious.getContainer().getName());
         }
     }
 
@@ -38,7 +59,7 @@ public class UploadArtifactStep extends BaseArtifactStep {
                 remoteTargetPath.mkdirs();
             }
 
-            final OverthereFile artifactFile = getArtifact().getFile();
+            final OverthereFile artifactFile = artifact.getFile();
             final String artifactFilePath = artifactFile.getPath();
             if (artifactFile.isFile()) {
                 ctx.logOutput("Artifact: file");
@@ -64,28 +85,31 @@ public class UploadArtifactStep extends BaseArtifactStep {
                 if (changeSet.getRemoved().size() > 0) {
                     ctx.logOutput("Start removal of files...");
                     DirectoryDiff.DirectoryChangeSet previousChangeSet = null;
-                    if (isSharedTarget() && getPreviousArtifact() != null) {
-                        previousChangeSet = new DirectoryDiff(remoteTargetPath, getPreviousArtifact().getFile()).diff();
+                    if (isSharedTarget() && previousArtifact != null) {
+                        previousChangeSet = new DirectoryDiff(remoteTargetPath, previousArtifact.getFile()).diff();
                         ctx.logOutput(format("Shared options is on and we have a previous artifact"));
-                        ctx.logOutput(format("previous %d files to be removed:    %s", previousChangeSet.getRemoved().size(), previousChangeSet.getRemoved()));
-                        ctx.logOutput(format("previous %d new files to be copied: %s", previousChangeSet.getAdded().size(), previousChangeSet.getAdded()));
-                        ctx.logOutput(format("previous %d modified files to be copied.", previousChangeSet.getChanged().size()));
+                        ctx.logOutput(format("%d file(s) not managed by this artifact, should be skipped: %s", previousChangeSet.getRemoved().size(), previousChangeSet.getRemoved()));
                         ctx.logOutput(format("/Previous Change Set....."));
                     }
 
                     for (OverthereFile f : changeSet.getRemoved()) {
                         OverthereFile removedFile = remoteTargetPath.getFile(stringPathPrefix(f, getTargetPath()));
                         String fileType = (f.isDirectory() ? "directory" : "file");
-                        if (removedFile.exists()) {
-                            if (isSharedTarget() && previousChangeSet.getRemoved().contains(f)) {
-                                ctx.logOutput(format("Skipping %s %s", fileType, removedFile.getPath()));
-                            } else {
-                                ctx.logOutput(format("Removing %s %s", fileType, removedFile.getPath()));
-                                removedFile.deleteRecursively();
-                            }
-                        } else {
+                        if (!removedFile.exists()) {
                             ctx.logOutput(format("File %s does not exist. Ignoring.", removedFile.getPath()));
+                            continue;
                         }
+                        if (isSharedTarget() && previousArtifact != null && previousChangeSet.getRemoved().contains(f)) {
+                            ctx.logOutput(format("Skipping (1) %s %s", fileType, removedFile.getPath()));
+                            continue;
+                        }
+                        if (isSharedTarget() && previousArtifact == null) {
+                            ctx.logOutput(format("Skipping (2) %s %s", fileType, removedFile.getPath()));
+                            continue;
+                        }
+
+                        ctx.logOutput(format("Removing %s %s", fileType, removedFile.getPath()));
+                        removedFile.deleteRecursively();
                     }
                     ctx.logOutput("Removal of files done.");
                 }
@@ -126,5 +150,14 @@ public class UploadArtifactStep extends BaseArtifactStep {
         }
     }
 
+    private Artifact defaultArtifact(StepPostConstructContext ctx) {
+        final Deployed<? extends Deployable, ? extends Container> deployed = ctx.getDelta().getDeployed();
+        return deployed instanceof Artifact ? (Artifact) deployed : null;
+    }
+
+    private Artifact defaultPreviousArtifact(StepPostConstructContext ctx) {
+        final Deployed<? extends Deployable, ? extends Container> deployed = ctx.getDelta().getPrevious();
+        return deployed instanceof Artifact ? (Artifact) deployed : null;
+    }
 
 }
