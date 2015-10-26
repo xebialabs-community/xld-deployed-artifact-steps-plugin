@@ -86,10 +86,9 @@ public class UploadArtifactStep extends BaseArtifactStep {
                     ctx.logOutput("Start removal of files...");
                     DirectoryDiff.DirectoryChangeSet previousChangeSet = null;
                     if (isSharedTarget() && previousArtifact != null) {
+                        ctx.logOutput(format("Shared option is 'on' and have a previous artifact"));
                         previousChangeSet = new DirectoryDiff(remoteTargetPath, previousArtifact.getFile()).diff();
-                        ctx.logOutput(format("Shared options is on and we have a previous artifact"));
                         ctx.logOutput(format("%d file(s) not managed by this artifact, should be skipped: %s", previousChangeSet.getRemoved().size(), previousChangeSet.getRemoved()));
-                        ctx.logOutput(format("/Previous Change Set....."));
                     }
 
                     for (OverthereFile f : changeSet.getRemoved()) {
