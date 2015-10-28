@@ -6,6 +6,8 @@
 package ext.deployit.community.extra.steps;
 
 import com.xebialabs.deployit.plugin.api.flow.ExecutionContext;
+import com.xebialabs.deployit.plugin.api.flow.Preview;
+import com.xebialabs.deployit.plugin.api.flow.PreviewStep;
 import com.xebialabs.deployit.plugin.api.flow.StepExitCode;
 import com.xebialabs.deployit.plugin.api.rules.RulePostConstruct;
 import com.xebialabs.deployit.plugin.api.rules.StepMetadata;
@@ -20,10 +22,12 @@ import com.xebialabs.overthere.OverthereFile;
 import com.xebialabs.overtherepy.DirectoryChangeSet;
 import com.xebialabs.overtherepy.DirectoryDiff;
 
+import ext.deployit.community.extra.steps.action.ActionBuilder;
+
 import static java.lang.String.format;
 
 @StepMetadata(name = "upload-artifact")
-public class UploadArtifactStep extends BaseArtifactStep {
+public class UploadArtifactStep extends BaseArtifactStep implements PreviewStep {
 
     @StepParameter(name = "artifact", description = "Artifact that has been uploaded to the target host.")
     private Artifact artifact;
@@ -52,102 +56,122 @@ public class UploadArtifactStep extends BaseArtifactStep {
         }
     }
 
+
     public StepExitCode execute(ExecutionContext ctx) throws Exception {
         try (OverthereConnection connection = getTargetHost().getConnection()) {
-            final OverthereFile remoteTargetPath = connection.getFile(getTargetPath());
-            if (!remoteTargetPath.exists()) {
-                ctx.logOutput("Remote path " + getTargetPath() + " does not exists, create it");
-                remoteTargetPath.mkdirs();
-            }
-
-            final OverthereFile artifactFile = artifact.getFile();
-            final String artifactFilePath = artifactFile.getPath();
-            if (artifactFile.isFile()) {
-                ctx.logOutput("Artifact: file");
-                final OverthereFile remoteFile = connection.getFile(remoteTargetPath, artifactFile.getName());
-                if (remoteFile.exists()) {
-                    ctx.logError(format("Remote file '%s' exists, it will be removed", remoteFile.getPath()));
-                    remoteFile.delete();
-                }
-                ctx.logOutput(format("Copy %s -> %s", artifactFilePath, remoteFile.getPath()));
-                artifactFile.copyTo(remoteFile);
-            }
-
-
-            if (artifactFile.isDirectory()) {
-                ctx.logOutput("Artifact: Folder");
-                DirectoryDiff diff = new DirectoryDiff(remoteTargetPath, artifactFile);
-                final DirectoryChangeSet changeSet = diff.diff();
-                ctx.logOutput(format("%d files to be removed.", changeSet.getRemoved().size()));
-                ctx.logOutput(format("%d new files to be copied.", changeSet.getAdded().size()));
-                ctx.logOutput(format("%d modified files to be copied.", changeSet.getChanged().size()));
-
-
-                if (changeSet.getRemoved().size() > 0) {
-                    ctx.logOutput("Start removal of files...");
-                    DirectoryChangeSet previousChangeSet = null;
-                    if (isSharedTarget() && previousArtifact != null) {
-                        ctx.logOutput(format("Shared option is 'on' and have a previous artifact"));
-                        previousChangeSet = new DirectoryDiff(remoteTargetPath, previousArtifact.getFile()).diff();
-                        ctx.logOutput(format("%d file(s) not managed by this artifact, should be skipped: %s", previousChangeSet.getRemoved().size(), previousChangeSet.getRemoved()));
-                    }
-
-                    for (OverthereFile f : changeSet.getRemoved()) {
-                        OverthereFile removedFile = remoteTargetPath.getFile(stringPathPrefix(f, getTargetPath()));
-                        String fileType = (f.isDirectory() ? "directory" : "file");
-                        if (!removedFile.exists()) {
-                            ctx.logOutput(format("File %s does not exist. Ignoring.", removedFile.getPath()));
-                            continue;
-                        }
-                        if (isSharedTarget() && previousArtifact != null && previousChangeSet.getRemoved().contains(f)) {
-                            ctx.logOutput(format("Skipping (1) %s %s", fileType, removedFile.getPath()));
-                            continue;
-                        }
-                        if (isSharedTarget() && previousArtifact == null) {
-                            ctx.logOutput(format("Skipping (2) %s %s", fileType, removedFile.getPath()));
-                            continue;
-                        }
-
-                        ctx.logOutput(format("Removing %s %s", fileType, removedFile.getPath()));
-                        removedFile.deleteRecursively();
-                    }
-                    ctx.logOutput("Removal of files done.");
-                }
-
-
-                if (changeSet.getAdded().size() > 0) {
-                    ctx.logOutput("Start copying of new files...");
-                    for (OverthereFile f : changeSet.getAdded()) {
-                        OverthereFile addFile = remoteTargetPath.getFile(stringPathPrefix(f, artifactFilePath));
-                        String fileType = "file";
-                        if (f.isDirectory()) {
-                            fileType = "directory";
-                            if (!f.exists())
-                                f.mkdirs();
-                        } else {
-                            if (!addFile.getParentFile().exists()) {
-                                addFile.getParentFile().mkdirs();
-                            }
-                        }
-                        ctx.logOutput(format("Copying %s %s", fileType, addFile.getPath()));
-                        f.copyTo(addFile);
-                    }
-                    ctx.logOutput("Copying of new files done.");
-                }
-
-                if (changeSet.getChanged().size() > 0) {
-                    ctx.logOutput("Start copying of modified files...");
-                    for (OverthereFile f : changeSet.getChanged()) {
-                        OverthereFile changedFile = remoteTargetPath.getFile(stringPathPrefix(f, artifactFilePath));
-                        ctx.logOutput(format("Updating file %s", changedFile.getPath()));
-                        f.copyTo(changedFile);
-                    }
-                    ctx.logOutput("Copying of modified files done.");
-                }
-
-            }
+            analyze(connection).execute(ctx);
             return StepExitCode.SUCCESS;
         }
+    }
+
+    @Override
+    public Preview getPreview() {
+        try (OverthereConnection connection = getTargetHost().getConnection()) {
+            return analyze(connection).preview();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Preview.withContents(e.getMessage());
+        }
+    }
+
+    public ActionBuilder analyze(OverthereConnection connection) throws Exception {
+        ActionBuilder actions = new ActionBuilder();
+
+        final OverthereFile remoteTargetPath = connection.getFile(getTargetPath());
+        if (!remoteTargetPath.exists()) {
+            actions.systemOut("Remote path " + getTargetPath() + " does not exists, create it");
+            actions.mkdirs(remoteTargetPath);
+        }
+
+        final OverthereFile artifactFile = artifact.getFile();
+        final String artifactFilePath = artifactFile.getPath();
+        if (artifactFile.isFile()) {
+            actions.systemOut("Artifact: file");
+            final OverthereFile remoteFile = connection.getFile(remoteTargetPath, artifactFile.getName());
+            if (remoteFile.exists()) {
+                actions.systemOut(format("Remote file '%s' exists, it will be removed", remoteFile.getPath()));
+                actions.delete(remoteFile);
+            }
+            actions.systemOut(format("Copy %s -> %s", artifactFilePath, remoteFile.getPath()));
+            actions.copyTo(artifactFile, remoteFile);
+        }
+
+
+        if (artifactFile.isDirectory()) {
+            actions.systemOut("Artifact: Folder");
+            DirectoryDiff diff = new DirectoryDiff(remoteTargetPath, artifactFile);
+            final DirectoryChangeSet changeSet = diff.diff();
+            actions.systemOut(format("%d files to be removed.", changeSet.getRemoved().size()));
+            actions.systemOut(format("%d new files to be copied.", changeSet.getAdded().size()));
+            actions.systemOut(format("%d modified files to be copied.", changeSet.getChanged().size()));
+
+
+            if (changeSet.getRemoved().size() > 0) {
+                actions.systemOut("Start removal of files...");
+                DirectoryChangeSet previousChangeSet = null;
+                if (isSharedTarget() && previousArtifact != null) {
+                    actions.systemOut(format("Shared option is 'on' and have a previous artifact"));
+                    previousChangeSet = new DirectoryDiff(remoteTargetPath, previousArtifact.getFile()).diff();
+                    actions.systemOut(format("%d file(s) not managed by this artifact, should be skipped: %s", previousChangeSet.getRemoved().size(), previousChangeSet.getRemoved()));
+                }
+
+                for (OverthereFile f : changeSet.getRemoved()) {
+                    OverthereFile removedFile = remoteTargetPath.getFile(stringPathPrefix(f, getTargetPath()));
+                    String fileType = (f.isDirectory() ? "directory" : "file");
+                    if (!removedFile.exists()) {
+                        actions.systemOut(format("File %s does not exist. Ignoring.", removedFile.getPath()));
+                        continue;
+                    }
+                    if (isSharedTarget() && previousArtifact != null && previousChangeSet.getRemoved().contains(f)) {
+                        actions.systemOut(format("Skipping (1) %s %s", fileType, removedFile.getPath()));
+                        continue;
+                    }
+                    if (isSharedTarget() && previousArtifact == null) {
+                        actions.systemOut(format("Skipping (2) %s %s", fileType, removedFile.getPath()));
+                        continue;
+                    }
+
+                    actions.systemOut(format("Removing %s %s", fileType, removedFile.getPath()));
+                    actions.deleteRecursively(removedFile);
+
+                }
+                actions.systemOut("Removal of files done.");
+            }
+
+
+            if (changeSet.getAdded().size() > 0) {
+                actions.systemOut("Start copying of new files...");
+                for (OverthereFile f : changeSet.getAdded()) {
+                    OverthereFile addFile = remoteTargetPath.getFile(stringPathPrefix(f, artifactFilePath));
+                    String fileType = "file";
+                    if (f.isDirectory()) {
+                        fileType = "directory";
+                        if (!f.exists())
+                            actions.mkdirs(f);
+                    } else {
+                        if (!addFile.getParentFile().exists()) {
+                            actions.mkdirs(addFile.getParentFile());
+                        }
+                    }
+                    actions.systemOut(format("Copying %s %s", fileType, addFile.getPath()));
+                    actions.copyTo(f, addFile);
+                }
+                actions.systemOut("Copying of new files done.");
+            }
+
+            if (changeSet.getChanged().size() > 0) {
+                actions.systemOut("Start copying of modified files...");
+                for (OverthereFile f : changeSet.getChanged()) {
+                    OverthereFile changedFile = remoteTargetPath.getFile(stringPathPrefix(f, artifactFilePath));
+                    actions.systemOut(format("Updating file %s", changedFile.getPath()));
+                    actions.copyTo(f, changedFile);
+                }
+                actions.systemOut("Copying of modified files done.");
+            }
+
+        }
+
+        return actions;
     }
 
     private Artifact defaultArtifact(StepPostConstructContext ctx) {
@@ -159,5 +183,6 @@ public class UploadArtifactStep extends BaseArtifactStep {
         final Deployed<? extends Deployable, ? extends Container> deployed = ctx.getDelta().getPrevious();
         return deployed instanceof Artifact ? (Artifact) deployed : null;
     }
+
 
 }
