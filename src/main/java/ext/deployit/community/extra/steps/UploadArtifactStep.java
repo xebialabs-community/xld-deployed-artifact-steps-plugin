@@ -17,6 +17,7 @@ import com.xebialabs.deployit.plugin.api.udm.Deployed;
 import com.xebialabs.deployit.plugin.api.udm.artifact.Artifact;
 import com.xebialabs.overthere.OverthereConnection;
 import com.xebialabs.overthere.OverthereFile;
+import com.xebialabs.overtherepy.DirectoryChangeSet;
 import com.xebialabs.overtherepy.DirectoryDiff;
 
 import static java.lang.String.format;
@@ -76,7 +77,7 @@ public class UploadArtifactStep extends BaseArtifactStep {
             if (artifactFile.isDirectory()) {
                 ctx.logOutput("Artifact: Folder");
                 DirectoryDiff diff = new DirectoryDiff(remoteTargetPath, artifactFile);
-                final DirectoryDiff.DirectoryChangeSet changeSet = diff.diff();
+                final DirectoryChangeSet changeSet = diff.diff();
                 ctx.logOutput(format("%d files to be removed.", changeSet.getRemoved().size()));
                 ctx.logOutput(format("%d new files to be copied.", changeSet.getAdded().size()));
                 ctx.logOutput(format("%d modified files to be copied.", changeSet.getChanged().size()));
@@ -84,7 +85,7 @@ public class UploadArtifactStep extends BaseArtifactStep {
 
                 if (changeSet.getRemoved().size() > 0) {
                     ctx.logOutput("Start removal of files...");
-                    DirectoryDiff.DirectoryChangeSet previousChangeSet = null;
+                    DirectoryChangeSet previousChangeSet = null;
                     if (isSharedTarget() && previousArtifact != null) {
                         ctx.logOutput(format("Shared option is 'on' and have a previous artifact"));
                         previousChangeSet = new DirectoryDiff(remoteTargetPath, previousArtifact.getFile()).diff();

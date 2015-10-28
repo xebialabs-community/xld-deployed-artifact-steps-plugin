@@ -165,32 +165,12 @@ public class DirectoryDiff {
         return directoriesStillToCheck;
     }
 
-
     private Set<FileWrapper> listFiles(OverthereFile dir) {
         return newHashSet(Lists.transform(newArrayList(dir.listFiles()), new WrapFile()));
     }
 
     private HashCode hash(final OverthereFile file, HashFunction hashFunction) throws IOException {
         return asByteSource(file).hash(hashFunction);
-    }
-
-    public static class DirectoryChangeSet {
-        private List<OverthereFile> removed = newArrayList();
-        private List<OverthereFile> added = newArrayList();
-        private List<OverthereFile> changed = newArrayList();
-
-        public List<OverthereFile> getAdded() {
-            return added;
-        }
-
-        public List<OverthereFile> getChanged() {
-            return changed;
-        }
-
-        public List<OverthereFile> getRemoved() {
-            return removed;
-        }
-
     }
 
     static class WrapFile implements Function<OverthereFile, FileWrapper> {
