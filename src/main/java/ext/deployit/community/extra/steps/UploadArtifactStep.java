@@ -27,7 +27,7 @@ import ext.deployit.community.extra.steps.action.ActionBuilder;
 import static java.lang.String.format;
 
 @StepMetadata(name = "upload-artifact")
-public class UploadArtifactStep extends BaseArtifactStep implements PreviewStep {
+public class UploadArtifactStep extends BaseArtifactStep  {
 
     @StepParameter(name = "artifact", description = "Artifact that has been uploaded to the target host.")
     private Artifact artifact;
