@@ -20,6 +20,7 @@ public class Delete extends BaseAction {
 
     @Override
     public void execute(final ExecutionContext ctx) {
+        ctx.logOutput("Delete "+remoteTargetPath.getPath());
         remoteTargetPath.delete();
     }
 }

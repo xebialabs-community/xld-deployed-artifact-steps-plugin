@@ -20,6 +20,7 @@ public class DeleteRecursively extends BaseAction {
 
     @Override
     public void execute(final ExecutionContext ctx) {
+        ctx.logOutput("Delete recursively "+remoteTargetPath.getPath());
         remoteTargetPath.deleteRecursively();
     }
 }

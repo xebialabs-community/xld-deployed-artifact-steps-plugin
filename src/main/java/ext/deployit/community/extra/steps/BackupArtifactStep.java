@@ -119,6 +119,17 @@ public class BackupArtifactStep extends BaseArtifactStep implements PreviewStep 
             actions.systemOut("Backup modified files done.");
         }
 
+        if (changeSet.getAdded().size() > 0) {
+            actions.systemOut("Mark added files...");
+            for (OverthereFile f : changeSet.getAdded()) {
+                final String pathPrefix = stringPathPrefix(f, artifactFilePath);
+                OverthereFile addedFile = remoteTargetPath.getFile(pathPrefix);
+                actions.systemOut(format("Mark %s as added ", addedFile.getPath()));
+                actions.markAdded(backupRemoteFolder, addedFile);
+            }
+            actions.systemOut("Mark added files done...");
+
+        }
         return actions;
     }
 }

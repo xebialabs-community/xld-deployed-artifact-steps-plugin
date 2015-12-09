@@ -32,11 +32,15 @@ public class ActionBuilder {
     }
 
     public void copyTo(final OverthereFile artifactFile, final OverthereFile remoteFile) {
-        actions.add(new CopyTo(artifactFile,remoteFile));
+        actions.add(new CopyTo(artifactFile, remoteFile));
     }
 
     public void deleteRecursively(final OverthereFile removedFile) {
         actions.add(new DeleteRecursively(removedFile));
+    }
+
+    public void markAdded(final OverthereFile backupRemoteFolder, final OverthereFile addedFile) {
+        actions.add(new Added(backupRemoteFolder, addedFile));
     }
 
     public void execute(final ExecutionContext ctx) {
@@ -52,4 +56,6 @@ public class ActionBuilder {
         }
         return Preview.withContents(sb.toString());
     }
+
+
 }

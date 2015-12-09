@@ -6,6 +6,9 @@
 package ext.deployit.community.extra.steps;
 
 
+import java.io.InputStream;
+import java.util.Properties;
+
 import com.xebialabs.deployit.plugin.api.flow.ExecutionContext;
 import com.xebialabs.deployit.plugin.api.flow.StepExitCode;
 import com.xebialabs.deployit.plugin.api.rules.RulePostConstruct;
@@ -66,6 +69,22 @@ public class RestoreFolderStep extends BaseArtifactStep {
                 actions.copyTo(sourceFile, f);
             }
             actions.systemOut("Restore modified files done.");
+        }
+
+        final OverthereFile addedFile = fromTargetPath.getFile("added.txt");
+        if (addedFile.exists()) {
+            Properties added = new Properties();
+            final InputStream inputStream = addedFile.getInputStream();
+            added.load(inputStream);
+            inputStream.close();
+            for (Object key : added.keySet()) {
+                final OverthereFile file = connection.getFile(key.toString());
+                if (file.isFile()) {
+                    actions.delete(file);
+                } else {
+                    actions.deleteRecursively(file);
+                }
+            }
         }
 
         return actions;
