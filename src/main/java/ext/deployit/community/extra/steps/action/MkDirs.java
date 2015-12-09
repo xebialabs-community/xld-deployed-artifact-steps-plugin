@@ -20,6 +20,7 @@ public class MkDirs extends BaseAction {
 
     @Override
     public void execute(final ExecutionContext ctx) {
-        remoteTargetPath.mkdirs();
+        if (!remoteTargetPath.exists())
+            remoteTargetPath.mkdirs();
     }
 }
