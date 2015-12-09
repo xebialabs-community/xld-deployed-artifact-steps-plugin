@@ -64,6 +64,7 @@ public class UploadArtifactStep extends BaseArtifactStep  {
         }
     }
 
+    /*
     @Override
     public Preview getPreview() {
         try (OverthereConnection connection = getTargetHost().getConnection()) {
@@ -73,6 +74,7 @@ public class UploadArtifactStep extends BaseArtifactStep  {
             return Preview.withContents(e.getMessage());
         }
     }
+    */
 
     public ActionBuilder analyze(OverthereConnection connection) throws Exception {
         ActionBuilder actions = new ActionBuilder();
