@@ -6,8 +6,6 @@
 package ext.deployit.community.extra.steps;
 
 import com.xebialabs.deployit.plugin.api.flow.ExecutionContext;
-import com.xebialabs.deployit.plugin.api.flow.Preview;
-import com.xebialabs.deployit.plugin.api.flow.PreviewStep;
 import com.xebialabs.deployit.plugin.api.flow.StepExitCode;
 import com.xebialabs.deployit.plugin.api.rules.RulePostConstruct;
 import com.xebialabs.deployit.plugin.api.rules.StepMetadata;
@@ -27,7 +25,7 @@ import ext.deployit.community.extra.steps.action.ActionBuilder;
 import static java.lang.String.format;
 
 @StepMetadata(name = "upload-artifact")
-public class UploadArtifactStep extends BaseArtifactStep  {
+public class UploadArtifactStep extends BaseArtifactStep {
 
     @StepParameter(name = "artifact", description = "Artifact that has been uploaded to the target host.")
     private Artifact artifact;
@@ -78,7 +76,6 @@ public class UploadArtifactStep extends BaseArtifactStep  {
 
     public ActionBuilder analyze(OverthereConnection connection) throws Exception {
         ActionBuilder actions = new ActionBuilder();
-
         final OverthereFile remoteTargetPath = connection.getFile(getTargetPath());
         if (!remoteTargetPath.exists()) {
             actions.systemOut("Remote path " + getTargetPath() + " does not exists, create it");
@@ -99,14 +96,19 @@ public class UploadArtifactStep extends BaseArtifactStep  {
         }
 
 
-        if (artifactFile.isDirectory()) {
-            actions.systemOut("Artifact: Folder");
+        if (artifactFile.isDirectory() && !remoteTargetPath.exists()) {
+            actions.systemOut("Artifact: new Folder ");
+            actions.systemOut(format("Copy %s -> %s", artifactFilePath, remoteTargetPath.getPath()));
+            actions.copyTo(artifactFile, remoteTargetPath);
+        }
+
+        if (artifactFile.isDirectory() && remoteTargetPath.exists()) {
+            actions.systemOut("Artifact: existing Folder");
             DirectoryDiff diff = new DirectoryDiff(remoteTargetPath, artifactFile);
             final DirectoryChangeSet changeSet = diff.diff();
             actions.systemOut(format("%d files to be removed.", changeSet.getRemoved().size()));
             actions.systemOut(format("%d new files to be copied.", changeSet.getAdded().size()));
             actions.systemOut(format("%d modified files to be copied.", changeSet.getChanged().size()));
-
 
             if (changeSet.getRemoved().size() > 0) {
                 actions.systemOut("Start removal of files...");
