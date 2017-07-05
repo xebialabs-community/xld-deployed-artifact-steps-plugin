@@ -27,7 +27,12 @@ Thank you @ravan.
 
 # Installation #
 
-Place the plugin JAR file into your `SERVER_HOME/plugins` directory.  
+Place the plugin JAR file into your `SERVER_HOME/plugins` directory.
+Add this line to the log configuration
+```
+<logger name="com.xebialabs.overthere.ssh.SshSftpFile" level="error" />
+
+```
 
 # Usage #
 
@@ -78,4 +83,5 @@ xl-rules.xml file.
 </rule>
 
 ```
+
 
