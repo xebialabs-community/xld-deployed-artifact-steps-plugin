@@ -105,7 +105,11 @@ public class UploadArtifactStep extends BaseArtifactStep {
         if (artifactFile.isDirectory() && remoteTargetPath.exists()) {
             actions.systemOut("Artifact: existing Folder");
             DirectoryDiff diff = new DirectoryDiff(remoteTargetPath, artifactFile);
+            actions.systemOut("Start Diff Analysis...");
+            long  start = System.currentTimeMillis();
             final DirectoryChangeSet changeSet = diff.diff();
+            long  end = System.currentTimeMillis();
+            actions.systemOut(format("End Diff Analysis...%d seconds",((end-start)/1000)));
             actions.systemOut(format("%d files to be removed.", changeSet.getRemoved().size()));
             actions.systemOut(format("%d new files to be copied.", changeSet.getAdded().size()));
             actions.systemOut(format("%d modified files to be copied.", changeSet.getChanged().size()));
