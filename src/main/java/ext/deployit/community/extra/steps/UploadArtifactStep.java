@@ -57,7 +57,10 @@ public class UploadArtifactStep extends BaseArtifactStep {
 
     public StepExitCode execute(ExecutionContext ctx) throws Exception {
         try (OverthereConnection connection = getTargetHost().getConnection()) {
-            analyze(connection).execute(ctx);
+            ctx.logOutput("Analyse...");
+            ActionBuilder analyze = analyze(connection);
+            ctx.logOutput("Execute...");
+            analyze.execute(ctx);
             return StepExitCode.SUCCESS;
         }
     }
