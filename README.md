@@ -6,19 +6,19 @@ See the **XL Deploy Reference Manual** for background information on XL Deploy a
 
 # Overview #
 
-In 80% of the use case, an upload deployment rule copy the associated artifact to a remote dir without to give anymore extra parameters. If we are using an Un*x shell syntax, it will be : ```scp -r myfolder ssh@machine:/opt/mymiddleware```. 
+In 80% of the use case, an upload deployment rule copies the associated artifact to a remote dir without to give anymore extra parameters. If we are using an Un*x shell syntax, it will be : ```scp -r myfolder ssh@machine:/opt/mymiddleware```.
 Moreover, the folder can be very large and it'll be smart to update only the created and modified file and removed the extra files.
 
 So this plugin offers 2 new steps:
  
-* `upload-artifact` to upload and delete an artifact to a remote directory with a rule using a 'deployed' scope mode
-* `delete-artifact` to delete an artifact from a remote directory with a rule using a 'deployed' scope mode
+* `<upload-artifact>` to upload and delete an artifact to a remote directory with a rule using a 'deployed' scope mode
+* `<delete-artifact>` to delete an artifact from a remote directory with a rule using a 'deployed' scope mode
  
 
 # Requirements #
 
 * **Requirements**
-	* **XL Deploy** 4.5.0+
+	* **XL Deploy** 6.0.0+
 	
 # Special Thanks #
 
@@ -27,14 +27,19 @@ Thank you @ravan.
 
 # Installation #
 
-Place the plugin JAR file into your `SERVER_HOME/plugins` directory.
-Add this line to the log configuration
+* Place the plugin JAR file into your `SERVER_HOME/plugins` directory.
+* To improve performances,  Add this line to the log configuration conf/logback.xml
+
 ```
 <logger name="com.xebialabs.overthere.ssh.SshSftpFile" level="error" />
-
 ```
 
-# Usage #
+# Out-of-box Usage #
+
+If you want to quickly test the plugins, there is a new deployable type `file.LargeFolder' that targets a remote host. It is using the new steps.
+
+# Custom Usage #
+
 
 synthetic.xml file.
 
