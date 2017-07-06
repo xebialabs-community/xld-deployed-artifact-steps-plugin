@@ -60,7 +60,6 @@ synthetic.xml file.
 xl-rules.xml file.
 
 ```
-
 <rule name="a.deploy.file" scope="deployed">
 <conditions>
   <type>a.DeployedFileArtifact</type>
@@ -86,7 +85,6 @@ xl-rules.xml file.
   </delete-artifact>
 </steps>
 </rule>
-
 ```
 
 
