@@ -31,7 +31,6 @@ public class DirectoryDiff {
 
     private OverthereFile leftSide;
     private OverthereFile rightSide;
-    private HashFunction hashFunction = Hashing.goodFastHash(32);
 
 
     /**

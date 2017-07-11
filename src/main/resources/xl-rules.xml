@@ -31,7 +31,7 @@
         </conditions>
         <steps>
             <delete-artifact>
-                <description expression="true">"Remove {0} from {1}".format(deployed.name, deployed.container.name)</description>
+                <description expression="true">"Remove {0} from {1}".format(previousDeployed.name, previousDeployed.container.name)</description>
                 <order>40</order>
                 <target-path expression="true">previousDeployed.targetPath</target-path>
             </delete-artifact>

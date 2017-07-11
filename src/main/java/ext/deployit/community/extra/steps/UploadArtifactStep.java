@@ -19,7 +19,6 @@ import com.xebialabs.overthere.OverthereConnection;
 import com.xebialabs.overthere.OverthereFile;
 import com.xebialabs.overtherepy.DirectoryChangeSet;
 import com.xebialabs.overtherepy.DirectoryDiff;
-
 import ext.deployit.community.extra.steps.action.ActionBuilder;
 
 import static java.lang.String.format;
@@ -57,7 +56,7 @@ public class UploadArtifactStep extends BaseArtifactStep {
 
     public StepExitCode execute(ExecutionContext ctx) throws Exception {
         try (OverthereConnection connection = getTargetHost().getConnection()) {
-            ctx.logOutput("Analyse..."+getTargetPath());
+            ctx.logOutput("Analyse..." + getTargetPath());
             ActionBuilder analyze = analyze(connection);
             ctx.logOutput("Execute...");
             analyze.execute(ctx);
@@ -109,10 +108,10 @@ public class UploadArtifactStep extends BaseArtifactStep {
             actions.systemOut("Artifact: existing Folder");
             DirectoryDiff diff = new DirectoryDiff(remoteTargetPath, artifactFile);
             actions.systemOut("Start Diff Analysis...");
-            long  start = System.currentTimeMillis();
+            long start = System.currentTimeMillis();
             final DirectoryChangeSet changeSet = diff.diff();
-            long  end = System.currentTimeMillis();
-            actions.systemOut(format("End Diff Analysis...%d seconds",((end-start)/1000)));
+            long end = System.currentTimeMillis();
+            actions.systemOut(format("End Diff Analysis...%d seconds", ((end - start) / 1000)));
             actions.systemOut(format("%d files to be removed.", changeSet.getRemoved().size()));
             actions.systemOut(format("%d new files to be copied.", changeSet.getAdded().size()));
             actions.systemOut(format("%d modified files to be copied.", changeSet.getChanged().size()));
