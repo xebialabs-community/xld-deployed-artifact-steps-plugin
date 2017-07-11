@@ -13,7 +13,7 @@ import com.xebialabs.overthere.ssh.SshConnectionBuilder;
 import static java.lang.String.format;
 
 
-public class DirectoryDiffTest {
+public class PerformanceDirectoryDiff {
 
     public static void main(String[] args) throws Exception {
         DirectoryDiff diff = new DirectoryDiff(leftFile(), rightFile());
@@ -35,6 +35,7 @@ public class DirectoryDiffTest {
         options.set(ConnectionOptions.OPERATING_SYSTEM, "UNIX");
         return Overthere.getConnection("local", options).getFile("/Users/bmoussaud/Workspace/xebialabs/poc/amundi/xl-deploy-7.0.0-server/importablePackages/repo/repository");
     }
+
 
     private static OverthereFile leftFile() {
         ConnectionOptions options = new ConnectionOptions();
