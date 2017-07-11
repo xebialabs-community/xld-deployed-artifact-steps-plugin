@@ -17,7 +17,7 @@ public class DirectoryDiffTest {
 
     public static void main(String[] args) throws Exception {
         DirectoryDiff diff = new DirectoryDiff(leftFile(), rightFile());
-        System.out.println("Start Diff Analysis...");
+        System.out.println("---- Start Diff Analysis...");
         long  start = System.currentTimeMillis();
         final DirectoryChangeSet changeSet = diff.diff();
         long  end = System.currentTimeMillis();
