@@ -14,7 +14,6 @@ import org.junit.Test;
 
 import java.io.IOException;
 
-import static java.lang.String.format;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.core.Is.is;
@@ -49,7 +48,6 @@ public class DirectoryDiffTest {
         OverthereFile remoteDirectory = getTemporaryDirectory();
         DirectoryDiff diff = new DirectoryDiff(remoteDirectory, content);
 
-
         final DirectoryChangeSet changeSet = diff.diff();
         assertThat(2, is(equalTo(changeSet.getAdded().size())));
         assertThat(changeSet.getAdded(), hasItem(getLocalConnection().getFile("src/test/resources/content/A/Level1")));
@@ -57,23 +55,17 @@ public class DirectoryDiffTest {
         assertThat(0, is(equalTo(changeSet.getRemoved().size())));
         assertThat(0, is(equalTo(changeSet.getChanged().size())));
 
-        dump(changeSet);
     }
 
     @Test
     public void testSameFolder() throws IOException {
         OverthereFile content = content_A();
-        OverthereFile remoteDirectory = getTemporaryDirectory();
         DirectoryDiff diff = new DirectoryDiff(content, content);
-
 
         final DirectoryChangeSet changeSet = diff.diff();
         assertThat(0, is(equalTo(changeSet.getAdded().size())));
         assertThat(0, is(equalTo(changeSet.getRemoved().size())));
         assertThat(0, is(equalTo(changeSet.getChanged().size())));
-
-        dump(changeSet);
-
     }
 
     @Test
@@ -90,11 +82,12 @@ public class DirectoryDiffTest {
         DirectoryDiff diff = new DirectoryDiff(remoteDirectory1, remoteDirectory2);
 
         final DirectoryChangeSet changeSet = diff.diff();
-        dump(changeSet);
+
         assertThat(1, is(equalTo(changeSet.getAdded().size())));
         assertThat(changeSet.getAdded(), hasItem(file22c));
         assertThat(0, is(equalTo(changeSet.getRemoved().size())));
         assertThat(0, is(equalTo(changeSet.getChanged().size())));
+
     }
 
     @Test
@@ -111,7 +104,7 @@ public class DirectoryDiffTest {
         DirectoryDiff diff = new DirectoryDiff(remoteDirectory2, remoteDirectory1);
 
         final DirectoryChangeSet changeSet = diff.diff();
-        dump(changeSet);
+
         assertThat(0, is(equalTo(changeSet.getAdded().size())));
         assertThat(1, is(equalTo(changeSet.getRemoved().size())));
         assertThat(changeSet.getRemoved(), hasItem(file22c));
@@ -126,18 +119,11 @@ public class DirectoryDiffTest {
         DirectoryDiff diff = new DirectoryDiff(content_a, content_b);
 
         final DirectoryChangeSet changeSet = diff.diff();
-        dump(changeSet);
+
         assertThat(0, is(equalTo(changeSet.getAdded().size())));
         assertThat(0, is(equalTo(changeSet.getRemoved().size())));
         assertThat(8, is(equalTo(changeSet.getChanged().size())));
     }
 
-
-    private void dump(DirectoryChangeSet changeSet) {
-        System.out.println(format("%d files to be removed.", changeSet.getRemoved().size()));
-        System.out.println(format("%d new files to be copied.", changeSet.getAdded().size()));
-        System.out.println(format("%s new files to be copied.", changeSet.getAdded()));
-        System.out.println(format("%d modified files to be copied.", changeSet.getChanged().size()));
-    }
 
 }
