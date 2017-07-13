@@ -87,7 +87,7 @@ public class DeleteArtifactStep extends BaseArtifactStep {
     }
 
     private void deleteFile(final OverthereFile file, ExecutionContext ctx) {
-        //ctx.logOutput("Deleting " + file.getPath());
+        ctx.logOutput("Deleting " + file.getPath());
         if (file.exists()) {
             file.deleteRecursively();
         } else {
