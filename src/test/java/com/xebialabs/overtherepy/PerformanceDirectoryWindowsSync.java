@@ -13,9 +13,7 @@ import com.xebialabs.overthere.ConnectionOptions;
 import com.xebialabs.overthere.Overthere;
 import com.xebialabs.overthere.OverthereFile;
 import com.xebialabs.overthere.cifs.CifsConnectionBuilder;
-import com.xebialabs.overthere.smb.SmbConnectionBuilder;
-import com.xebialabs.overthere.ssh.SshConnectionBuilder;
-import ext.deployit.community.extra.steps.action.ActionBuilder;
+import com.xebialabs.overtherepy.action.ActionBuilder;
 
 
 public class PerformanceDirectoryWindowsSync {
@@ -24,7 +22,6 @@ public class PerformanceDirectoryWindowsSync {
         DirectorySync sync = new DirectorySync(leftFile(), rightFile());
         System.out.println("Sync.......");
         ActionBuilder actions = sync.sync();
-        //System.out.println(actions.previewContentString());
 
         actions.execute(new DummyExecutionContext());
 
@@ -35,7 +32,7 @@ public class PerformanceDirectoryWindowsSync {
     private static OverthereFile rightFile() {
         ConnectionOptions options = new ConnectionOptions();
         options.set(ConnectionOptions.OPERATING_SYSTEM, "UNIX");
-        return Overthere.getConnection("local", options).getFile("/Users/bmoussaud/Workspace/xebialabs/poc/amundi/xl-deploy-7.0.0-server-amundi");
+        return Overthere.getConnection("local", options).getFile("/Users/bmoussaud/Workspace/xebialabs/poc/amundi/xl-deploy-7.0.0-server-amundi/lib");
     }
 
 
@@ -47,7 +44,7 @@ public class PerformanceDirectoryWindowsSync {
         options.set(ConnectionOptions.USERNAME, "Admin");
         options.set(ConnectionOptions.PASSWORD, "xebiaLabs2015");
 
-        return Overthere.getConnection(CifsConnectionBuilder.CIFS_PROTOCOL, options).getFile("C:\\AMUNDI\\xl-deploy-7.0.0-server-amundi\\");
+        return Overthere.getConnection(CifsConnectionBuilder.CIFS_PROTOCOL, options).getFile("C:\\AMUNDI\\xl-deploy-7.0.0-server-amundi\\lib\\");
     }
 
     private static class DummyExecutionContext implements ExecutionContext {

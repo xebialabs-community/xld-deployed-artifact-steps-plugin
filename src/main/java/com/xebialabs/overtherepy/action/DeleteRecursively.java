@@ -3,7 +3,7 @@
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS
  * FOR A PARTICULAR PURPOSE. THIS CODE AND INFORMATION ARE NOT SUPPORTED BY XEBIALABS.
  */
-package ext.deployit.community.extra.steps.action;
+package com.xebialabs.overtherepy.action;
 
 import com.xebialabs.deployit.plugin.api.flow.ExecutionContext;
 import com.xebialabs.overthere.OverthereFile;

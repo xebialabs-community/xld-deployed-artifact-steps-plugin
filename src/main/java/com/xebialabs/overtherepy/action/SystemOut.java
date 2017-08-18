@@ -3,13 +3,19 @@
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS
  * FOR A PARTICULAR PURPOSE. THIS CODE AND INFORMATION ARE NOT SUPPORTED BY XEBIALABS.
  */
-package ext.deployit.community.extra.steps;
+package com.xebialabs.overtherepy.action;
+
 
 import com.xebialabs.deployit.plugin.api.flow.ExecutionContext;
 
-public interface Action {
+public class SystemOut extends BaseAction {
 
-    void execute(ExecutionContext ctx);
+    public SystemOut(String message) {
+        previewBuffer = message;
+    }
 
-    String preview();
+    @Override
+    public void execute(final ExecutionContext ctx) {
+        ctx.logOutput(previewBuffer);
+    }
 }

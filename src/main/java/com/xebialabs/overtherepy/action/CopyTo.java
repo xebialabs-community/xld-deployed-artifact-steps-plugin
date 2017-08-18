@@ -3,24 +3,23 @@
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS
  * FOR A PARTICULAR PURPOSE. THIS CODE AND INFORMATION ARE NOT SUPPORTED BY XEBIALABS.
  */
-package ext.deployit.community.extra.steps.action;
+package com.xebialabs.overtherepy.action;
 
 import com.xebialabs.deployit.plugin.api.flow.ExecutionContext;
 import com.xebialabs.overthere.OverthereFile;
 
 
-public class MkDirs extends BaseAction {
+public class CopyTo extends BaseAction {
 
-    private final OverthereFile remoteTargetPath;
+    private final OverthereFile artifactFile;
+    private final OverthereFile remoteFile;
 
-    public MkDirs(final OverthereFile remoteTargetPath) {
-        super();
-        this.remoteTargetPath = remoteTargetPath;
+    public CopyTo(final OverthereFile artifactFile, final OverthereFile remoteFile) {
+        this.artifactFile = artifactFile;
+        this.remoteFile = remoteFile;
     }
-
     @Override
     public void execute(final ExecutionContext ctx) {
-        if (!remoteTargetPath.exists())
-            remoteTargetPath.mkdirs();
+        artifactFile.copyTo(remoteFile);
     }
 }

@@ -17,9 +17,8 @@ import com.xebialabs.deployit.plugin.api.udm.Deployed;
 import com.xebialabs.deployit.plugin.api.udm.artifact.Artifact;
 import com.xebialabs.overthere.OverthereConnection;
 import com.xebialabs.overthere.OverthereFile;
-import com.xebialabs.overtherepy.DirectoryChangeSet;
-import com.xebialabs.overtherepy.DirectoryDiff;
-import ext.deployit.community.extra.steps.action.ActionBuilder;
+import com.xebialabs.overtherepy.DirectorySync;
+import com.xebialabs.overtherepy.action.ActionBuilder;
 
 import static java.lang.String.format;
 
@@ -105,80 +104,8 @@ public class UploadArtifactStep extends BaseArtifactStep {
         }
 
         if (artifactFile.isDirectory() && remoteTargetPath.exists()) {
-            actions.systemOut("Artifact: existing Folder");
-            DirectoryDiff diff = new DirectoryDiff(remoteTargetPath, artifactFile);
-            actions.systemOut("Start Diff Analysis...");
-            long start = System.currentTimeMillis();
-            final DirectoryChangeSet changeSet = diff.diff();
-            long end = System.currentTimeMillis();
-            actions.systemOut(format("End Diff Analysis...%d seconds", ((end - start) / 1000)));
-            actions.systemOut(format("%d files to be removed.", changeSet.getRemoved().size()));
-            actions.systemOut(format("%d new files to be copied.", changeSet.getAdded().size()));
-            actions.systemOut(format("%d modified files to be copied.", changeSet.getChanged().size()));
-
-            if (changeSet.getRemoved().size() > 0) {
-                actions.systemOut("Start removal of files...");
-                DirectoryChangeSet previousChangeSet = null;
-                if (isSharedTarget() && previousArtifact != null) {
-                    actions.systemOut(format("Shared option is 'on' and have a previous artifact"));
-                    previousChangeSet = new DirectoryDiff(remoteTargetPath, previousArtifact.getFile()).diff();
-                    actions.systemOut(format("%d file(s) not managed by this artifact, should be skipped: %s", previousChangeSet.getRemoved().size(), previousChangeSet.getRemoved()));
-                }
-
-                for (OverthereFile f : changeSet.getRemoved()) {
-                    OverthereFile removedFile = remoteTargetPath.getFile(stringPathPrefix(f, getTargetPath()));
-                    String fileType = (f.isDirectory() ? "directory" : "file");
-                    if (!removedFile.exists()) {
-                        actions.systemOut(format("File %s does not exist. Ignoring.", removedFile.getPath()));
-                        continue;
-                    }
-                    if (isSharedTarget() && previousArtifact != null && previousChangeSet.getRemoved().contains(f)) {
-                        actions.systemOut(format("Skipping (1) %s %s", fileType, removedFile.getPath()));
-                        continue;
-                    }
-                    if (isSharedTarget() && previousArtifact == null) {
-                        actions.systemOut(format("Skipping (2) %s %s", fileType, removedFile.getPath()));
-                        continue;
-                    }
-
-                    actions.systemOut(format("Removing %s %s", fileType, removedFile.getPath()));
-                    actions.deleteRecursively(removedFile);
-
-                }
-                actions.systemOut("Removal of files done.");
-            }
-
-
-            if (changeSet.getAdded().size() > 0) {
-                actions.systemOut("Start copying of new files...");
-                for (OverthereFile f : changeSet.getAdded()) {
-                    OverthereFile addFile = remoteTargetPath.getFile(stringPathPrefix(f, artifactFilePath));
-                    String fileType = "file";
-                    if (f.isDirectory()) {
-                        fileType = "directory";
-                        if (!f.exists())
-                            actions.mkdirs(f);
-                    } else {
-                        if (!addFile.getParentFile().exists()) {
-                            actions.mkdirs(addFile.getParentFile());
-                        }
-                    }
-                    actions.systemOut(format("Copying %s %s", fileType, addFile.getPath()));
-                    actions.copyTo(f, addFile);
-                }
-                actions.systemOut("Copying of new files done.");
-            }
-
-            if (changeSet.getChanged().size() > 0) {
-                actions.systemOut("Start copying of modified files...");
-                for (OverthereFile f : changeSet.getChanged()) {
-                    OverthereFile changedFile = remoteTargetPath.getFile(stringPathPrefix(f, artifactFilePath));
-                    actions.systemOut(format("Updating file %s", changedFile.getPath()));
-                    actions.copyTo(f, changedFile);
-                }
-                actions.systemOut("Copying of modified files done.");
-            }
-
+            DirectorySync sync = new DirectorySync(remoteTargetPath, artifactFile);
+            actions.addAll(sync.sync().getActions());
         }
 
         return actions;

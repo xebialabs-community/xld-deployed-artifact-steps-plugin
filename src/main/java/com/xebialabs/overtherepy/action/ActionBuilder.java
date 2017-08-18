@@ -3,14 +3,14 @@
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS
  * FOR A PARTICULAR PURPOSE. THIS CODE AND INFORMATION ARE NOT SUPPORTED BY XEBIALABS.
  */
-package ext.deployit.community.extra.steps.action;
+package com.xebialabs.overtherepy.action;
 
 
 import com.google.common.collect.Lists;
 import com.xebialabs.deployit.plugin.api.flow.ExecutionContext;
 import com.xebialabs.deployit.plugin.api.flow.Preview;
 import com.xebialabs.overthere.OverthereFile;
-import ext.deployit.community.extra.steps.Action;
+import com.xebialabs.overtherepy.Action;
 
 import java.util.List;
 

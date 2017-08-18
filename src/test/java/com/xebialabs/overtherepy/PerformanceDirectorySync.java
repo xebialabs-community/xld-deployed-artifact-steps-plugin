@@ -13,7 +13,7 @@ import com.xebialabs.overthere.ConnectionOptions;
 import com.xebialabs.overthere.Overthere;
 import com.xebialabs.overthere.OverthereFile;
 import com.xebialabs.overthere.ssh.SshConnectionBuilder;
-import ext.deployit.community.extra.steps.action.ActionBuilder;
+import com.xebialabs.overtherepy.action.ActionBuilder;
 
 
 public class PerformanceDirectorySync {

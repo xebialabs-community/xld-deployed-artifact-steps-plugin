@@ -1,8 +1,7 @@
 package com.xebialabs.overtherepy;
 
 import com.xebialabs.overthere.OverthereFile;
-import ext.deployit.community.extra.steps.Action;
-import ext.deployit.community.extra.steps.action.ActionBuilder;
+import com.xebialabs.overtherepy.action.ActionBuilder;
 
 import java.io.IOException;
 import java.util.List;
