@@ -74,7 +74,7 @@ public class DirectorySync {
                     if (!f.exists())
                         actions.mkdirs(f);
                 } else {
-                    if (!addFile.getParentFile().exists()) {
+                    if (addFile.getParentFile() != null && !addFile.getParentFile().exists()) {
                         actions.mkdirs(addFile.getParentFile());
                     }
                 }
