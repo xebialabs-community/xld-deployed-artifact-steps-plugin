@@ -6,6 +6,8 @@
 package ext.deployit.community.extra.steps;
 
 import com.xebialabs.deployit.plugin.api.flow.ExecutionContext;
+import com.xebialabs.deployit.plugin.api.flow.Preview;
+import com.xebialabs.deployit.plugin.api.flow.PreviewStep;
 import com.xebialabs.deployit.plugin.api.flow.StepExitCode;
 import com.xebialabs.deployit.plugin.api.rules.RulePostConstruct;
 import com.xebialabs.deployit.plugin.api.rules.StepMetadata;
@@ -23,7 +25,7 @@ import com.xebialabs.overtherepy.action.ActionBuilder;
 import static java.lang.String.format;
 
 @StepMetadata(name = "upload-artifact")
-public class UploadArtifactStep extends BaseArtifactStep {
+public class UploadArtifactStep extends BaseArtifactStep implements PreviewStep {
 
     @StepParameter(name = "artifact", description = "Artifact that has been uploaded to the target host.")
     private Artifact artifact;
@@ -63,7 +65,7 @@ public class UploadArtifactStep extends BaseArtifactStep {
         }
     }
 
-    /*
+
     @Override
     public Preview getPreview() {
         try (OverthereConnection connection = getTargetHost().getConnection()) {
@@ -73,7 +75,7 @@ public class UploadArtifactStep extends BaseArtifactStep {
             return Preview.withContents(e.getMessage());
         }
     }
-    */
+
 
     public ActionBuilder analyze(OverthereConnection connection) throws Exception {
         ActionBuilder actions = new ActionBuilder();
