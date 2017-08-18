@@ -6,14 +6,13 @@
 package ext.deployit.community.extra.steps.action;
 
 
-import java.util.List;
 import com.google.common.collect.Lists;
-
 import com.xebialabs.deployit.plugin.api.flow.ExecutionContext;
 import com.xebialabs.deployit.plugin.api.flow.Preview;
 import com.xebialabs.overthere.OverthereFile;
-
 import ext.deployit.community.extra.steps.Action;
+
+import java.util.List;
 
 public class ActionBuilder {
 
@@ -50,12 +49,22 @@ public class ActionBuilder {
     }
 
     public Preview preview() {
+        return Preview.withContents(previewContentString());
+    }
+
+    public String previewContentString() {
         StringBuffer sb = new StringBuffer();
         for (Action action : actions) {
             sb.append(action.preview()).append("\n");
         }
-        return Preview.withContents(sb.toString());
+        return sb.toString();
     }
 
+    public List<Action> getActions() {
+        return actions;
+    }
 
+    public void addAll(List<Action> otherActions) {
+        actions.addAll(otherActions);
+    }
 }
