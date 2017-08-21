@@ -33,6 +33,10 @@ public class UploadArtifactStep extends BaseArtifactStep implements PreviewStep 
     @StepParameter(name = "previousArtifact", description = "Previous deployed artifact.", calculated = true, required = false)
     private Artifact previousArtifact;
 
+    @StepParameter(name = "uploadOnly", description = "Copy only the news and updates files, leave the missing files as is, default false", calculated = true)
+    private boolean uploadOnly = false;
+
+
     @RulePostConstruct
     public void postContruct(StepPostConstructContext ctx) {
         doConfigure(ctx);
@@ -106,8 +110,13 @@ public class UploadArtifactStep extends BaseArtifactStep implements PreviewStep 
         }
 
         if (artifactFile.isDirectory() && remoteTargetPath.exists()) {
-            DirectorySync sync = new DirectorySync(remoteTargetPath, artifactFile);
-            actions.addAll(sync.sync().getActions());
+            actions.systemOut("Artifact: existing Folder");
+            DirectorySync sync = new DirectorySync(remoteTargetPath, artifactFile, previousArtifact.getFile(), isSharedTarget());
+            if (uploadOnly) {
+                actions.addAll(sync.update().getActions());
+            } else {
+                actions.addAll(sync.sync().getActions());
+            }
         }
 
         return actions;

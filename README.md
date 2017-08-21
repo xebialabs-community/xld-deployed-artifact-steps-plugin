@@ -36,7 +36,16 @@ Thank you @ravan.
 
 # Out-of-box Usage #
 
-If you want to quickly test the plugins, there is a new deployable type `file.LargeFolder' that targets a remote host. It is using the new steps.
+If you want to quickly test the plugin, there is a new deployable type `file.LargeFolder' that targets a remote host. It is using the new steps.
+
+```
+<type type="file.DeployedLargeFolder" extends="udm.BaseDeployedArtifact" deployable-type="file.LargeFolder" container-type="overthere.Host">
+    <generate-deployable type="file.LargeFolder" extends="udm.BaseDeployableFolderArtifact"/>
+    <property name="targetPath" description="Path to which artifact must be copied to on the host."/>
+    <property category="Advanced" name="targetPathShared" kind="boolean" default="false" required="false" description="Is the targetPath shared by others on the host. When true, the targetPath is not deleted during undeployment; only the artifacts copied to it."/>
+    <property category="Advanced" name="uploadOnly" kind="boolean" default="false" required="false" description="Is the targetPath shared by others on the host. When true, the targetPath is not deleted during undeployment; only the artifacts copied to it."/>
+</type>
+```
 
 # Custom Usage #
 

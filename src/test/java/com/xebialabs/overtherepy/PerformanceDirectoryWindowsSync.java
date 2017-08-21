@@ -19,7 +19,7 @@ import com.xebialabs.overtherepy.action.ActionBuilder;
 public class PerformanceDirectoryWindowsSync {
 
     public static void main(String[] args) throws Exception {
-        DirectorySync sync = new DirectorySync(leftFile(), rightFile());
+        DirectorySync sync = new DirectorySync(leftFile(), rightFile(), null, true);
         System.out.println("Sync.......");
         ActionBuilder actions = sync.sync();
 

@@ -8,18 +8,38 @@
 -->
 <rules xmlns="http://www.xebialabs.com/xl-deploy/xl-rules">
 
-    <rule name="file.LargeFolder.deploy" scope="deployed">
+    <rule name="file.LargeFolder.write.sync" scope="deployed">
         <conditions>
             <type>file.DeployedLargeFolder</type>
             <operation>CREATE</operation>
             <operation>MODIFY</operation>
+            <expression>deployed.uploadOnly</expression>
         </conditions>
         <steps>
             <upload-artifact>
-                <description expression="true">"Copy {0} to {1}".format(deployed.name, deployed.container.name)</description>
+                <description expression="true">"Write Synchronization {0} on {1}".format(deployed.name, deployed.container.name)</description>
                 <order>60</order>
                 <target-path expression="true">deployed.targetPath</target-path>
-                <shared-target>False</shared-target>
+                <shared-target expression="true">deployed.targetPathShared</shared-target>
+                <upload-only expression="true">deployed.uploadOnly</upload-only>
+            </upload-artifact>
+        </steps>
+    </rule>
+
+    <rule name="file.LargeFolder.full.sync" scope="deployed">
+        <conditions>
+            <type>file.DeployedLargeFolder</type>
+            <operation>CREATE</operation>
+            <operation>MODIFY</operation>
+            <expression>not deployed.uploadOnly</expression>
+        </conditions>
+        <steps>
+            <upload-artifact>
+                <description expression="true">"Full Synchronization {0} on {1}".format(deployed.name, deployed.container.name)</description>
+                <order>60</order>
+                <target-path expression="true">deployed.targetPath</target-path>
+                <shared-target expression="true">deployed.targetPathShared</shared-target>
+                <upload-only expression="true">deployed.uploadOnly</upload-only>
             </upload-artifact>
         </steps>
     </rule>

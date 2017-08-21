@@ -17,25 +17,27 @@ public class DirectorySync {
     private final OverthereFile remoteTargetPath;
     private final OverthereFile artifactFile;
     private final OverthereFile previousArtifact;
-    private final boolean sharedRemoteDirectory = false;
+    private final boolean sharedRemoteDirectory;
 
     private DirectoryChangeSet changeSet;
 
 
     public DirectorySync(OverthereFile remoteTargetPath, OverthereFile artifactFile) {
-        this(remoteTargetPath, artifactFile, null);
+        this(remoteTargetPath, artifactFile, null, false);
     }
 
-    public DirectorySync(OverthereFile remoteTargetPath, OverthereFile artifactFile, OverthereFile previousArtifact) {
+    public DirectorySync(OverthereFile remoteTargetPath, OverthereFile artifactFile, OverthereFile previousArtifact, boolean sharedRemoteDirectory) {
         this.remoteTargetPath = remoteTargetPath;
         this.artifactFile = artifactFile;
         this.previousArtifact = previousArtifact;
+        this.sharedRemoteDirectory = sharedRemoteDirectory;
     }
+
 
     public ActionBuilder sync() throws IOException {
         final ActionBuilder actions = new ActionBuilder();
+        actions.systemOut(format("Synchronize..."));
 
-        actions.systemOut("Artifact: existing Folder");
         DirectoryDiff diff = new DirectoryDiff(remoteTargetPath, artifactFile);
         actions.systemOut("Start Diff Analysis...");
         long start = System.currentTimeMillis();
@@ -44,9 +46,30 @@ public class DirectorySync {
         actions.systemOut(format("End Diff Analysis...%d seconds", ((end - start) / 1000)));
         actions.systemOut(format("%d files to be removed.", changeSet.getRemoved().size()));
         actions.systemOut(format("%d new files to be copied.", changeSet.getAdded().size()));
-        actions.systemOut(format("%d modified files to be copied.", changeSet.getChanged().size()));
+        actions.systemOut(format("%d modified files to be changed.", changeSet.getChanged().size()));
 
         actions.addAll(remove());
+        actions.addAll(copy());
+        actions.addAll(change());
+
+        return actions;
+    }
+
+    public ActionBuilder update() throws IOException {
+
+        final ActionBuilder actions = new ActionBuilder();
+        actions.systemOut(format("Update..."));
+
+        DirectoryDiff diff = new DirectoryDiff(remoteTargetPath, artifactFile);
+        actions.systemOut("Start Diff Analysis...");
+        long start = System.currentTimeMillis();
+        changeSet = diff.diff();
+        long end = System.currentTimeMillis();
+        actions.systemOut(format("End Diff Analysis...%d seconds", ((end - start) / 1000)));
+
+        actions.systemOut(format("%d new files to be copied.", changeSet.getAdded().size()));
+        actions.systemOut(format("%d modified files to be changed.", changeSet.getChanged().size()));
+
         actions.addAll(copy());
         actions.addAll(change());
 
