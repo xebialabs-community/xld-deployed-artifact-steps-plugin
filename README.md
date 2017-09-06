@@ -14,7 +14,6 @@ So this plugin offers 2 new steps:
 * `<upload-artifact>` to upload and delete an artifact to a remote directory with a rule using a 'deployed' scope mode
 * `<delete-artifact>` to delete an artifact from a remote directory with a rule using a 'deployed' scope mode
  
-
 # Requirements #
 
 * **Requirements**
