@@ -111,7 +111,9 @@ public class UploadArtifactStep extends BaseArtifactStep implements PreviewStep 
 
         if (artifactFile.isDirectory() && remoteTargetPath.exists()) {
             actions.systemOut("Artifact: existing Folder");
-            DirectorySync sync = new DirectorySync(remoteTargetPath, artifactFile, previousArtifact.getFile(), isSharedTarget());
+
+            final OverthereFile previousArtifactFile = (previousArtifact == null ? null : previousArtifact.getFile());
+            final DirectorySync sync = new DirectorySync(remoteTargetPath, artifactFile, previousArtifactFile, isSharedTarget());
             if (uploadOnly) {
                 actions.addAll(sync.update().getActions());
             } else {
