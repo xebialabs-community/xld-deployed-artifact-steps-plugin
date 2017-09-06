@@ -21,7 +21,7 @@ apply plugin: 'eclipse'
 apply plugin: 'maven'
 
 
-version = '1.0.9'
+version = '1.0.10'
 def apiVersion = '2016.2.3'
 
 apply plugin: "com.github.hierynomus.license"
