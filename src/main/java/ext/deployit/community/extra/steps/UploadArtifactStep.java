@@ -33,7 +33,7 @@ public class UploadArtifactStep extends BaseArtifactStep implements PreviewStep 
     @StepParameter(name = "previousArtifact", description = "Previous deployed artifact.", calculated = true, required = false)
     private Artifact previousArtifact;
 
-    @StepParameter(name = "uploadOnly", description = "Copy only the news and updates files, leave the missing files as is, default false", calculated = true)
+    @StepParameter(name = "uploadOnly", description = "Copy only the new and updated files, leave the missing files as is, default false", calculated = true)
     private boolean uploadOnly = false;
 
 
