@@ -18,19 +18,21 @@ public class DirectorySync {
     private final OverthereFile artifactFile;
     private final OverthereFile previousArtifact;
     private final boolean sharedRemoteDirectory;
+    private final boolean optimizedDiff;
 
     private DirectoryChangeSet changeSet;
 
 
     public DirectorySync(OverthereFile remoteTargetPath, OverthereFile artifactFile) {
-        this(remoteTargetPath, artifactFile, null, false);
+        this(remoteTargetPath, artifactFile, null, false, false);
     }
 
-    public DirectorySync(OverthereFile remoteTargetPath, OverthereFile artifactFile, OverthereFile previousArtifact, boolean sharedRemoteDirectory) {
+    public DirectorySync(OverthereFile remoteTargetPath, OverthereFile artifactFile, OverthereFile previousArtifact, boolean sharedRemoteDirectory, boolean optimizedDiff) {
         this.remoteTargetPath = remoteTargetPath;
         this.artifactFile = artifactFile;
         this.previousArtifact = previousArtifact;
         this.sharedRemoteDirectory = sharedRemoteDirectory;
+        this.optimizedDiff = optimizedDiff;
     }
 
 
@@ -38,7 +40,7 @@ public class DirectorySync {
         final ActionBuilder actions = new ActionBuilder();
         actions.systemOut(format("Synchronize..."));
 
-        DirectoryDiff diff = new DirectoryDiff(remoteTargetPath, artifactFile);
+        DirectoryDiff diff = new DirectoryDiff(remoteTargetPath, artifactFile, optimizedDiff);
         actions.systemOut("Start Diff Analysis...");
         long start = System.currentTimeMillis();
         changeSet = diff.diff();
@@ -60,7 +62,7 @@ public class DirectorySync {
         final ActionBuilder actions = new ActionBuilder();
         actions.systemOut(format("Update..."));
 
-        DirectoryDiff diff = new DirectoryDiff(remoteTargetPath, artifactFile);
+        DirectoryDiff diff = new DirectoryDiff(remoteTargetPath, artifactFile, optimizedDiff);
         actions.systemOut("Start Diff Analysis...");
         long start = System.currentTimeMillis();
         changeSet = diff.diff();
@@ -122,7 +124,7 @@ public class DirectorySync {
             DirectoryChangeSet previousChangeSet = null;
             if (sharedRemoteDirectory && previousArtifact != null) {
                 actions.systemOut(format("Shared option is 'on' and have a previous artifact"));
-                previousChangeSet = new DirectoryDiff(remoteTargetPath, previousArtifact).diff();
+                previousChangeSet = new DirectoryDiff(remoteTargetPath, previousArtifact, optimizedDiff).diff();
                 actions.systemOut(format("%d file(s) not managed by this artifact, should be skipped: %s", previousChangeSet.getRemoved().size(), previousChangeSet.getRemoved()));
             }
 

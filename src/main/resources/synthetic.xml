@@ -9,11 +9,16 @@
            xmlns="http://www.xebialabs.com/deployit/synthetic"
            xsi:schemaLocation="http://www.xebialabs.com/deployit/synthetic synthetic.xsd">
 
-    <type type="file.DeployedLargeFolder" extends="udm.BaseDeployedArtifact" deployable-type="file.LargeFolder" container-type="overthere.Host">
+    <type type="file.DeployedLargeFolder" extends="udm.BaseDeployedArtifact" deployable-type="file.LargeFolder"
+          container-type="overthere.Host">
         <generate-deployable type="file.LargeFolder" extends="udm.BaseDeployableFolderArtifact"/>
         <property name="targetPath" description="Path to which artifact must be copied to on the host."/>
-        <property category="Advanced" name="targetPathShared" kind="boolean" default="false" required="false" description="Is the targetPath shared by others on the host. When true, the targetPath is not deleted during undeployment; only the artifacts copied to it."/>
-        <property category="Advanced" name="uploadOnly" kind="boolean" default="false" required="false" description="Is the targetPath shared by others on the host. When true, the targetPath is not deleted during undeployment; only the artifacts copied to it."/>
+        <property category="Advanced" name="targetPathShared" kind="boolean" default="false" required="false"
+                  description="Is the targetPath shared by others on the host. When true, the targetPath is not deleted during undeployment; only the artifacts copied to it."/>
+        <property category="Advanced" name="uploadOnly" kind="boolean" default="false" required="false"
+                  description="Is the targetPath shared by others on the host. When true, the targetPath is not deleted during undeployment; only the artifacts copied to it."/>
+        <property category="Advanced" name="optimizedDiff" kind="boolean" default="false" required="false"
+                  description="Optimize the diff process"/>
     </type>
 
 

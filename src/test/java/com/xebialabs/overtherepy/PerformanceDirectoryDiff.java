@@ -16,12 +16,12 @@ import static java.lang.String.format;
 public class PerformanceDirectoryDiff {
 
     public static void main(String[] args) throws Exception {
-        DirectoryDiff diff = new DirectoryDiff(leftFile(), rightFile());
+        DirectoryDiff diff = new DirectoryDiff(leftFile(), rightFile(), true);
         System.out.println("---- Start Diff Analysis...");
-        long  start = System.currentTimeMillis();
+        long start = System.currentTimeMillis();
         final DirectoryChangeSet changeSet = diff.diff();
-        long  end = System.currentTimeMillis();
-        System.out.println(format("End Diff Analysis...%d seconds",((end-start)/1000)));
+        long end = System.currentTimeMillis();
+        System.out.println(format("End Diff Analysis...%d seconds", ((end - start) / 1000)));
         System.out.println(format("%d files to be removed.", changeSet.getRemoved().size()));
         System.out.println(format("%d new files to be copied.", changeSet.getAdded().size()));
         System.out.println(format("%d modified files to be copied.", changeSet.getChanged().size()));
@@ -33,7 +33,7 @@ public class PerformanceDirectoryDiff {
     private static OverthereFile rightFile() {
         ConnectionOptions options = new ConnectionOptions();
         options.set(ConnectionOptions.OPERATING_SYSTEM, "UNIX");
-        return Overthere.getConnection("local", options).getFile("/Users/bmoussaud/Workspace/xebialabs/poc/amundi/xl-deploy-7.0.0-server/importablePackages/repo/repository");
+        return Overthere.getConnection("local", options).getFile("/Users/bmoussaud/.m2/repository");
     }
 
 

@@ -22,6 +22,7 @@
                 <target-path expression="true">deployed.targetPath</target-path>
                 <shared-target expression="true">deployed.targetPathShared</shared-target>
                 <upload-only expression="true">deployed.uploadOnly</upload-only>
+                <optimized-diff expression="true">deployed.optimizedDiff</optimized-diff>
             </upload-artifact>
         </steps>
     </rule>
@@ -40,6 +41,7 @@
                 <target-path expression="true">deployed.targetPath</target-path>
                 <shared-target expression="true">deployed.targetPathShared</shared-target>
                 <upload-only expression="true">deployed.uploadOnly</upload-only>
+                <optimized-diff expression="true">deployed.optimizedDiff</optimized-diff>
             </upload-artifact>
         </steps>
     </rule>

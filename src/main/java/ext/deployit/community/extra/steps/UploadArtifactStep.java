@@ -36,6 +36,9 @@ public class UploadArtifactStep extends BaseArtifactStep implements PreviewStep 
     @StepParameter(name = "uploadOnly", description = "Copy only the new and updated files, leave the missing files as is, default false", calculated = true)
     private boolean uploadOnly = false;
 
+    @StepParameter(name = "optimizedDiff", description = "Optimize the diff directory process", calculated = true)
+    private boolean optimizedDiff = false;
+
 
     @RulePostConstruct
     public void postContruct(StepPostConstructContext ctx) {
@@ -113,7 +116,7 @@ public class UploadArtifactStep extends BaseArtifactStep implements PreviewStep 
             actions.systemOut("Artifact: existing Folder");
 
             final OverthereFile previousArtifactFile = (previousArtifact == null ? null : previousArtifact.getFile());
-            final DirectorySync sync = new DirectorySync(remoteTargetPath, artifactFile, previousArtifactFile, isSharedTarget());
+            final DirectorySync sync = new DirectorySync(remoteTargetPath, artifactFile, previousArtifactFile, isSharedTarget(), optimizedDiff);
             if (uploadOnly) {
                 actions.addAll(sync.update().getActions());
             } else {

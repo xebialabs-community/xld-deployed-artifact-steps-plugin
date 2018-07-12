@@ -33,7 +33,7 @@ public class PerformanceDirectorySync {
     private static OverthereFile rightFile() {
         ConnectionOptions options = new ConnectionOptions();
         options.set(ConnectionOptions.OPERATING_SYSTEM, "UNIX");
-        return Overthere.getConnection("local", options).getFile("/Users/bmoussaud/Workspace/xebialabs/poc/amundi/xl-deploy-7.0.0-server/importablePackages/repo/repository");
+        return Overthere.getConnection("local", options).getFile("/Users/bmoussaud/.m2/repository");
     }
 
 

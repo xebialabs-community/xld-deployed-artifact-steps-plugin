@@ -14,6 +14,33 @@ So this plugin offers 2 new steps:
 * `<upload-artifact>` to upload and delete an artifact to a remote directory with a rule using a 'deployed' scope mode
 * `<delete-artifact>` to delete an artifact from a remote directory with a rule using a 'deployed' scope mode
  
+# Step parameters
+
+### <upload-artifact>
+
+| Parameter        | Type           | Description  | Required |
+| ------------- |:-------------:| :-----| ---:|
+| description | String | Step description | Yes |
+| order | integer | Step order | Yes |
+| targetHost | Host | A target host where the step is applied | Yes |
+| targetPath | String | Path of the file or folder where the artifact has been uploaded. | Yes |
+| artifact | Artifact | current artifact | Yes |
+| previousArtifact | Artifact | previous current artifact | No |
+| shared-target | boolean | Tell the target directory is shared | No |
+| upload-only | boolean | Copy only the new and updated files, leave the missing files as is, default false | No |
+| optimized-diff | boolean | Optimize the diff directory process | No |
+
+### <delete-artifact>
+
+| Parameter        | Type           | Description  | Required |
+| ------------- |:-------------:| :-----| ---:|
+| description | String | Step description | Yes |
+| order | integer | Step order | Yes |
+| targetHost | Host | A target host where the step is applied | Yes |
+| targetPath | String | Path of the file or folder where the artifact has been uploaded. | Yes |
+| previousArtifact | Artifact | previous current artifact | No |
+| shared-target | boolean | Tell the target directory is shared | No |
+
 # Requirements #
 
 * **Requirements**

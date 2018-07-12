@@ -5,12 +5,8 @@
  */
 package com.xebialabs.overtherepy;
 
-import com.google.common.base.Function;
 import com.google.common.base.Predicate;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.google.common.hash.HashFunction;
-import com.google.common.hash.Hashing;
 import com.xebialabs.overthere.OverthereFile;
 
 import java.io.IOException;
@@ -29,9 +25,13 @@ import static com.google.common.collect.Sets.newHashSet;
  */
 public class DirectoryDiff {
 
-    private OverthereFile leftSide;
-    private OverthereFile rightSide;
+    private final boolean parallelStream;
+    private final OverthereFile leftSide;
+    private final OverthereFile rightSide;
 
+    public DirectoryDiff(OverthereFile leftSide, OverthereFile rightSide) {
+        this(leftSide, rightSide, false);
+    }
 
     /**
      * Constructor
@@ -39,11 +39,12 @@ public class DirectoryDiff {
      * @param leftSide  directory to compare
      * @param rightSide directory to compare
      */
-    public DirectoryDiff(OverthereFile leftSide, OverthereFile rightSide) {
+    public DirectoryDiff(OverthereFile leftSide, OverthereFile rightSide, boolean parallelStream) {
         checkArgument(leftSide.isDirectory(), "File [%s] must be a directory.", leftSide);
         checkArgument(rightSide.isDirectory(), "File [%s] must be a directory.", rightSide);
         this.leftSide = leftSide;
         this.rightSide = rightSide;
+        this.parallelStream = parallelStream;
     }
 
     /**
@@ -55,7 +56,7 @@ public class DirectoryDiff {
     public DirectoryChangeSet diff() throws IOException {
         DirectoryChangeSet changeSet = new DirectoryChangeSet();
         compareDirectoryRecursive(leftSide, rightSide, changeSet);
-        changeSet.process();
+        changeSet.process(parallelStream);
         return changeSet;
     }
 
@@ -109,7 +110,7 @@ public class DirectoryDiff {
     }
 
     private Set<FileWrapper> listFiles(OverthereFile dir) {
-        return dir.listFiles().stream().map(file ->  new FileWrapper(file)).collect(Collectors.toSet());
+        return dir.listFiles().stream().map(file -> new FileWrapper(file)).collect(Collectors.toSet());
     }
 
     enum FileWrapperPredicates implements Predicate<FileWrapper> {

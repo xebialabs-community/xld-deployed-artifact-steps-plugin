@@ -52,8 +52,7 @@ public class DirectoryChangeSet {
     }
 
 
-    public void process() {
-        boolean parallelStream = true;
+    public void process(boolean parallelStream) {
         added.clear();
         removed.clear();
         changed.clear();

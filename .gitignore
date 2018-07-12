@@ -10,4 +10,9 @@ deployit-manifest.xml
 out/
 log/
 xl-deploy-4.5.4-server
+gradle/
+.DS_Store
 
+
+gradlew
+gradlew.bat
