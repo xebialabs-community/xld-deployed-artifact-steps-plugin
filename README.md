@@ -16,7 +16,7 @@ So this plugin offers 2 new steps:
  
 # Step parameters
 
-### <upload-artifact>
+### upload-artifact
 
 | Parameter        | Type           | Description  | Required |
 | ------------- |:-------------:| :-----| ---:|
@@ -30,7 +30,7 @@ So this plugin offers 2 new steps:
 | upload-only | boolean | Copy only the new and updated files, leave the missing files as is, default false | No |
 | optimized-diff | boolean | Optimize the diff directory process | No |
 
-### <delete-artifact>
+### delete-artifact
 
 | Parameter        | Type           | Description  | Required |
 | ------------- |:-------------:| :-----| ---:|
