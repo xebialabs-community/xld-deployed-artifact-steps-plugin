@@ -15,16 +15,7 @@
             <operation>MODIFY</operation>
             <expression>deployed.uploadOnly</expression>
         </conditions>
-        <steps>
-            <upload-artifact>
-                <description expression="true">"Write Synchronization {0} on {1}".format(deployed.name, deployed.container.name)</description>
-                <order>60</order>
-                <target-path expression="true">deployed.targetPath</target-path>
-                <shared-target expression="true">deployed.targetPathShared</shared-target>
-                <upload-only expression="true">deployed.uploadOnly</upload-only>
-                <optimized-diff expression="true">deployed.optimizedDiff</optimized-diff>
-            </upload-artifact>
-        </steps>
+        <planning-script-path>planning/upload-artifact-planning.py</planning-script-path>
     </rule>
 
     <rule name="file.LargeFolder.full.sync" scope="deployed">
