@@ -1,8 +1,8 @@
-context.addStep(steps.upload-artifact(
+context.addStep(steps.upload_artifact(
     order=60,
-    target-path=deployed.targetPath,
-    shared-target=deployed.targetPathShared,
-    upload-only=deployed.uploadOnly,
-    optimized-diff=deployed.optimizedDiff,
+    target_path=deployed.targetPath,
+    shared_target=deployed.targetPathShared,
+    upload_only=deployed.uploadOnly,
+    optimized_diff=deployed.optimizedDiff,
     description="Write Synchronization {0} on {1}".format(deployed.name, deployed.container.name),
 ))
