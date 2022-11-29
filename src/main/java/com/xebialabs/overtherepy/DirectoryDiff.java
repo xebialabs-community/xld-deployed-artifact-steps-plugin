@@ -47,6 +47,14 @@ public class DirectoryDiff {
         this.parallelStream = parallelStream;
     }
 
+    public OverthereFile getLeftSide() {
+        return leftSide;
+    }
+
+    public OverthereFile getRightSide() {
+        return rightSide;
+    }
+
     /**
      * Calculate the differences between the two directories that this class was constructed with.
      *

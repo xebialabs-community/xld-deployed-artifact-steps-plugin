@@ -39,6 +39,12 @@ public class UploadArtifactStep extends BaseArtifactStep implements PreviewStep 
     @StepParameter(name = "optimizedDiff", description = "Optimize the diff directory process", calculated = true)
     private boolean optimizedDiff = false;
 
+    @StepParameter(name = "diffUsingRemoteArtifactInLocalTemp", description = "Use a local temporary directory(copying the previous artifact from target) for the diff process", calculated = true)
+    private boolean diffUsingRemoteArtifactInLocalTemp = false;
+
+    @StepParameter(name = "diffUsingPreviousArtifact", description = "Use the previous artifact inside Deploy for the diff process", calculated = true)
+    private boolean diffUsingPreviousArtifact = false;
+
 
     @RulePostConstruct
     public void postContruct(StepPostConstructContext ctx) {
@@ -116,7 +122,8 @@ public class UploadArtifactStep extends BaseArtifactStep implements PreviewStep 
             actions.systemOut("Artifact: existing Folder");
 
             final OverthereFile previousArtifactFile = (previousArtifact == null ? null : previousArtifact.getFile());
-            final DirectorySync sync = new DirectorySync(remoteTargetPath, artifactFile, previousArtifactFile, isSharedTarget(), optimizedDiff);
+            final DirectorySync sync = new DirectorySync(remoteTargetPath, artifactFile,
+                previousArtifactFile, isSharedTarget(), optimizedDiff, diffUsingRemoteArtifactInLocalTemp, diffUsingPreviousArtifact);
             if (uploadOnly) {
                 actions.addAll(sync.update().getActions());
             } else {
