@@ -33,6 +33,8 @@
                 <shared-target expression="true">deployed.targetPathShared</shared-target>
                 <upload-only expression="true">deployed.uploadOnly</upload-only>
                 <optimized-diff expression="true">deployed.optimizedDiff</optimized-diff>
+                <diff-with-remote-temp expression="true">deployed.diffWithRemoteTemp</diff-with-remote-temp>
+                <diff-with-previous-artifact expression="true">deployed.diffWithPreviousArtifact</diff-with-previous-artifact>
             </upload-artifact>
         </steps>
     </rule>

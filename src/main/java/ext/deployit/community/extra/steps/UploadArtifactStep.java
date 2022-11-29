@@ -39,6 +39,12 @@ public class UploadArtifactStep extends BaseArtifactStep implements PreviewStep 
     @StepParameter(name = "optimizedDiff", description = "Optimize the diff directory process", calculated = true)
     private boolean optimizedDiff = false;
 
+    @StepParameter(name = "diffWithRemoteTemp", description = "Use a remote temporary directory for the diff process", calculated = true)
+    private boolean diffWithRemoteTemp = false;
+
+    @StepParameter(name = "diffWithPreviousArtifact", description = "Compare with the previous artifact inside Deploy for the diff process", calculated = true)
+    private boolean diffWithPreviousArtifact = false;
+
 
     @RulePostConstruct
     public void postContruct(StepPostConstructContext ctx) {
@@ -116,11 +122,15 @@ public class UploadArtifactStep extends BaseArtifactStep implements PreviewStep 
             actions.systemOut("Artifact: existing Folder");
 
             final OverthereFile previousArtifactFile = (previousArtifact == null ? null : previousArtifact.getFile());
-            final DirectorySync sync = new DirectorySync(remoteTargetPath, artifactFile, previousArtifactFile, isSharedTarget(), optimizedDiff);
+            final DirectorySync sync = new DirectorySync(remoteTargetPath, artifactFile,
+                previousArtifactFile, isSharedTarget(), optimizedDiff, diffWithRemoteTemp, diffWithPreviousArtifact);
             if (uploadOnly) {
                 actions.addAll(sync.update().getActions());
             } else {
                 actions.addAll(sync.sync().getActions());
+            }
+            if (diffWithRemoteTemp) {
+                actions.deleteRecursively(sync.getRemoteTempLocation());
             }
         }
 

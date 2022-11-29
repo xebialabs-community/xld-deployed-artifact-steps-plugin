@@ -10,6 +10,7 @@ import com.xebialabs.overtherepy.action.ActionBuilder;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Random;
 
 import static java.lang.String.format;
 
@@ -19,20 +20,32 @@ public class DirectorySync {
     private final OverthereFile previousArtifact;
     private final boolean sharedRemoteDirectory;
     private final boolean optimizedDiff;
+    private final boolean diffWithRemoteTemp;
+    private final boolean diffWithPreviousArtifact;
 
+    private OverthereFile remoteTempLocation;
+    private Random random = new Random();
     private DirectoryChangeSet changeSet;
 
 
     public DirectorySync(OverthereFile remoteTargetPath, OverthereFile artifactFile) {
-        this(remoteTargetPath, artifactFile, null, false, false);
+        this(remoteTargetPath, artifactFile, null, false, false, false, false);
     }
 
-    public DirectorySync(OverthereFile remoteTargetPath, OverthereFile artifactFile, OverthereFile previousArtifact, boolean sharedRemoteDirectory, boolean optimizedDiff) {
+    public DirectorySync(OverthereFile remoteTargetPath,
+                         OverthereFile artifactFile,
+                         OverthereFile previousArtifact,
+                         boolean sharedRemoteDirectory,
+                         boolean optimizedDiff,
+                         boolean diffWithRemoteTemp,
+                         boolean diffWithPreviousArtifact) {
         this.remoteTargetPath = remoteTargetPath;
         this.artifactFile = artifactFile;
         this.previousArtifact = previousArtifact;
         this.sharedRemoteDirectory = sharedRemoteDirectory;
         this.optimizedDiff = optimizedDiff;
+        this.diffWithRemoteTemp = diffWithRemoteTemp;
+        this.diffWithPreviousArtifact = diffWithPreviousArtifact;
     }
 
 
@@ -40,8 +53,8 @@ public class DirectorySync {
         final ActionBuilder actions = new ActionBuilder();
         actions.systemOut(format("Synchronize..."));
 
-        DirectoryDiff diff = new DirectoryDiff(remoteTargetPath, artifactFile, optimizedDiff);
-        actions.systemOut("Start Diff Analysis...");
+        DirectoryDiff diff = getDirectoryDiff(remoteTargetPath, artifactFile, previousArtifact, actions);
+        actions.systemOut(format("Start Diff Analysis left(%s) -> right(%s)...", remoteTargetPath.getPath(), artifactFile.getPath()));
         long start = System.currentTimeMillis();
         changeSet = diff.diff();
         long end = System.currentTimeMillis();
@@ -62,8 +75,8 @@ public class DirectorySync {
         final ActionBuilder actions = new ActionBuilder();
         actions.systemOut(format("Update..."));
 
-        DirectoryDiff diff = new DirectoryDiff(remoteTargetPath, artifactFile, optimizedDiff);
-        actions.systemOut("Start Diff Analysis...");
+        DirectoryDiff diff = getDirectoryDiff(remoteTargetPath, artifactFile, previousArtifact, actions);
+        actions.systemOut(format("Start Diff Analysis left(%s) -> right(%s)...", remoteTargetPath.getPath(), artifactFile.getPath()));
         long start = System.currentTimeMillis();
         changeSet = diff.diff();
         long end = System.currentTimeMillis();
@@ -76,6 +89,35 @@ public class DirectorySync {
         actions.addAll(change());
 
         return actions;
+    }
+
+    private DirectoryDiff getDirectoryDiff(OverthereFile remoteTargetPath,
+                                           OverthereFile artifactFile,
+                                           OverthereFile previousArtifactFile,
+                                           ActionBuilder actions) {
+        DirectoryDiff diff;
+        if (diffWithRemoteTemp) {
+            //create a temp folder in remote target path and copy the artifact to that path
+            //and do the diff analysis on that
+            actions.systemOut("Start copying to temp file in remote...");
+//            OverthereFile tempRemoteFile = remoteTargetPath.getConnection()
+//                .getTempFile("temp-for-" + artifactFile.getName());
+            remoteTempLocation = remoteTargetPath.getParentFile().getFile(format("temp-for-%s-%d", artifactFile.getName(), random.nextInt()));
+            long start = System.currentTimeMillis();
+            artifactFile.copyTo(remoteTempLocation);
+            long end = System.currentTimeMillis();
+            actions.systemOut(format("End copying to temp file in remote...%d seconds", ((end - start) / 1000)));
+            actions.systemOut(format("doing diff %s -> %s", remoteTargetPath.getPath(), remoteTempLocation.getPath()));
+
+            diff = new DirectoryDiff(remoteTargetPath, artifactFile, optimizedDiff);
+        } else if (diffWithPreviousArtifact && previousArtifactFile != null) {
+            actions.systemOut("Using previous artifact file for diff analysis...");
+            diff = new DirectoryDiff(previousArtifactFile, artifactFile, optimizedDiff);
+        } else {
+            actions.systemOut("Using default approach for diff analysis...");
+            diff = new DirectoryDiff(remoteTargetPath, artifactFile, optimizedDiff);
+        }
+        return diff;
     }
 
     private List<Action> change() {
@@ -163,5 +205,7 @@ public class DirectorySync {
         return relativePath.replace('\\', '/');
     }
 
-
+    public OverthereFile getRemoteTempLocation() {
+        return remoteTempLocation;
+    }
 }
