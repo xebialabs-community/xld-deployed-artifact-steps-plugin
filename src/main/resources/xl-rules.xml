@@ -15,7 +15,18 @@
             <operation>MODIFY</operation>
             <expression>deployed.uploadOnly</expression>
         </conditions>
-        <planning-script-path>planning/upload-artifact-planning.py</planning-script-path>
+        <steps>
+            <upload-artifact>
+                <description expression="true">"Write Synchronization {0} on {1}".format(deployed.name, deployed.container.name)</description>
+                <order>60</order>
+                <target-path expression="true">deployed.targetPath</target-path>
+                <shared-target expression="true">deployed.targetPathShared</shared-target>
+                <upload-only expression="true">deployed.uploadOnly</upload-only>
+                <optimized-diff expression="true">deployed.optimizedDiff</optimized-diff>
+                <diff-using-remote-artifact-in-local-temp expression="true">deployed.diffUsingRemoteArtifactInLocalTemp</diff-using-remote-artifact-in-local-temp>
+                <diff-using-previous-artifact expression="true">deployed.diffUsingPreviousArtifact</diff-using-previous-artifact>
+            </upload-artifact>
+        </steps>
     </rule>
 
     <rule name="file.LargeFolder.full.sync" scope="deployed">
@@ -33,8 +44,8 @@
                 <shared-target expression="true">deployed.targetPathShared</shared-target>
                 <upload-only expression="true">deployed.uploadOnly</upload-only>
                 <optimized-diff expression="true">deployed.optimizedDiff</optimized-diff>
-                <diff-with-remote-temp expression="true">deployed.diffWithRemoteTemp</diff-with-remote-temp>
-                <diff-with-previous-artifact expression="true">deployed.diffWithPreviousArtifact</diff-with-previous-artifact>
+                <diff-using-remote-artifact-in-local-temp expression="true">deployed.diffUsingRemoteArtifactInLocalTemp</diff-using-remote-artifact-in-local-temp>
+                <diff-using-previous-artifact expression="true">deployed.diffUsingPreviousArtifact</diff-using-previous-artifact>
             </upload-artifact>
         </steps>
     </rule>

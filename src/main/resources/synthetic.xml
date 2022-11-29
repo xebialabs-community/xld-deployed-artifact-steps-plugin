@@ -19,10 +19,10 @@
                   description="Is the targetPath shared by others on the host. When true, the targetPath is not deleted during undeployment; only the artifacts copied to it."/>
         <property category="Advanced" name="optimizedDiff" kind="boolean" default="false" required="false"
                   description="Optimize the diff process"/>
-        <property category="Advanced" name="diffWithRemoteTemp" kind="boolean" default="false" required="false"
-                  description="Use a remote temporary directory for the diff process"/>
-        <property category="Advanced" name="diffWithPreviousArtifact" kind="boolean" default="false" required="false"
-                  description="Compare with the previous artifact inside Deploy for the diff process"/>
+        <property category="Advanced" name="diffUsingRemoteArtifactInLocalTemp" kind="boolean" default="false" required="false"
+                  description="Use a local temporary directory(copying the previous artifact from target) for the diff process"/>
+        <property category="Advanced" name="diffUsingPreviousArtifact" kind="boolean" default="false" required="false"
+                  description="Use the previous artifact inside Deploy for the diff process"/>
     </type>
 
 

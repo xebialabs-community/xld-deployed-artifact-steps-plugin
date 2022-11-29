@@ -39,11 +39,11 @@ public class UploadArtifactStep extends BaseArtifactStep implements PreviewStep 
     @StepParameter(name = "optimizedDiff", description = "Optimize the diff directory process", calculated = true)
     private boolean optimizedDiff = false;
 
-    @StepParameter(name = "diffWithRemoteTemp", description = "Use a remote temporary directory for the diff process", calculated = true)
-    private boolean diffWithRemoteTemp = false;
+    @StepParameter(name = "diffUsingRemoteArtifactInLocalTemp", description = "Use a local temporary directory(copying the previous artifact from target) for the diff process", calculated = true)
+    private boolean diffUsingRemoteArtifactInLocalTemp = false;
 
-    @StepParameter(name = "diffWithPreviousArtifact", description = "Compare with the previous artifact inside Deploy for the diff process", calculated = true)
-    private boolean diffWithPreviousArtifact = false;
+    @StepParameter(name = "diffUsingPreviousArtifact", description = "Use the previous artifact inside Deploy for the diff process", calculated = true)
+    private boolean diffUsingPreviousArtifact = false;
 
 
     @RulePostConstruct
@@ -123,14 +123,11 @@ public class UploadArtifactStep extends BaseArtifactStep implements PreviewStep 
 
             final OverthereFile previousArtifactFile = (previousArtifact == null ? null : previousArtifact.getFile());
             final DirectorySync sync = new DirectorySync(remoteTargetPath, artifactFile,
-                previousArtifactFile, isSharedTarget(), optimizedDiff, diffWithRemoteTemp, diffWithPreviousArtifact);
+                previousArtifactFile, isSharedTarget(), optimizedDiff, diffUsingRemoteArtifactInLocalTemp, diffUsingPreviousArtifact);
             if (uploadOnly) {
                 actions.addAll(sync.update().getActions());
             } else {
                 actions.addAll(sync.sync().getActions());
-            }
-            if (diffWithRemoteTemp) {
-                actions.deleteRecursively(sync.getRemoteTempLocation());
             }
         }
 
